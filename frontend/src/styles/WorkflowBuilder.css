@@ -1,0 +1,238 @@
+.workflow-builder {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--bg-gray);
+}
+
+.workflow-builder-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  gap: 20px;
+}
+
+.workflow-builder-empty button {
+  background: var(--primary-green);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.workflow-header {
+  background: var(--card-white);
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  height: 60px;
+  flex-shrink: 0;
+}
+
+.workflow-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.component-library {
+  width: 240px;
+  background: var(--card-white);
+  border-right: 1px solid var(--border);
+  padding: 16px;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.sidebar-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+
+.component-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.component-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: var(--bg-gray);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: grab;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.component-item:active {
+  cursor: grabbing;
+}
+
+.component-item:hover {
+  border-color: var(--primary-green);
+  background: var(--light-green);
+  transform: translateX(4px);
+}
+
+.component-icon {
+  font-size: 18px;
+}
+
+.component-label {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.drag-handle {
+  font-size: 16px;
+  color: var(--text-secondary);
+  opacity: 0.5;
+}
+
+.canvas-container {
+  flex: 1;
+  position: relative;
+  background: var(--bg-gray);
+}
+
+.react-flow-canvas {
+  background: #FAFAFA;
+}
+
+.empty-canvas {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.empty-canvas-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.3;
+}
+
+.empty-canvas p {
+  font-size: 16px;
+  color: var(--text-secondary);
+  opacity: 0.6;
+}
+
+.floating-actions {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 10;
+}
+
+.fab {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fab:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.fab-run {
+  background: var(--primary-green);
+  color: white;
+}
+
+.fab-chat {
+  background: white;
+  border: 2px solid var(--border);
+}
+
+.stack-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--bg-gray);
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.edit-icon {
+  font-size: 14px;
+  opacity: 0.6;
+}
+
+.btn-save {
+  background: var(--primary-green);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.2s;
+}
+
+.btn-save:hover {
+  background: #45a049;
+}
+
+/* React Flow overrides */
+.react-flow__node {
+  cursor: pointer;
+}
+
+.react-flow__node.selected {
+  box-shadow: 0 0 0 2px var(--primary-green);
+}
+
+.react-flow__edge-path {
+  stroke: var(--text-secondary);
+  stroke-width: 2;
+}
+
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke: var(--primary-green);
+}
+
+.react-flow__controls {
+  bottom: 100px;
+}
+
+.react-flow__controls-button {
+  background: white;
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+
+.react-flow__controls-button:hover {
+  background: var(--bg-gray);
+}

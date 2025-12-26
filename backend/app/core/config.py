@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = False
+        str_strip_whitespace = True
 
 
 def get_settings() -> Settings:

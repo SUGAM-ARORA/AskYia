@@ -1,10 +1,18 @@
 import LoginForm from "../components/auth/LoginForm";
+import "../styles/Login.css";
 
 const Login = () => {
   return (
-    <div style={{ display: "grid", placeItems: "center", height: "100vh" }}>
-      <div style={{ background: "#0b1221", padding: 24, borderRadius: 12, border: "1px solid #1f2937" }}>
-        <h2 style={{ marginTop: 0 }}>Welcome back</h2>
+    <div className="login-container">
+      <div className="login-card">
+        <div className="login-header">
+          <div className="logo">
+            <span className="logo-icon">🟢</span>
+            <span className="logo-text">GenAI Stack</span>
+          </div>
+        </div>
+        <h2 className="login-title">Welcome back</h2>
+        <p className="login-subtitle">Sign in to continue building AI stacks</p>
         <LoginForm />
       </div>
     </div>

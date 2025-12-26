@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import WorkflowBuilder from "./pages/WorkflowBuilder";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
@@ -5,19 +6,30 @@ import { useAuthStore } from "./store/authSlice";
 
 function App() {
   const { isAuthenticated } = useAuthStore();
+  const [currentView, setCurrentView] = useState<"dashboard" | "workflow">("dashboard");
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      if (window.location.hash === "#workflow") {
+        setCurrentView("workflow");
+      } else {
+        setCurrentView("dashboard");
+      }
+    };
+
+    handleHashChange();
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
 
   if (!isAuthenticated) {
     return <Login />;
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-      <header style={{ padding: "12px 16px", borderBottom: "1px solid #1f2937" }}>
-        <h1 style={{ margin: 0, fontSize: "18px" }}>Askyia</h1>
-      </header>
-      <Dashboard />
-      <WorkflowBuilder />
-    </div>
+    <>
+      {currentView === "dashboard" ? <Dashboard /> : <WorkflowBuilder />}
+    </>
   );
 }
 
