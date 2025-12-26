@@ -1,0 +1,45 @@
+replicaCount: 1
+
+frontend:
+  image:
+    repository: frontend
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 80
+
+backend:
+  image:
+    repository: backend
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8000
+  env:
+    DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/workflow
+
+postgres:
+  image:
+    repository: postgres
+    tag: 15
+  env:
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
+    POSTGRES_DB: workflow
+
+chromadb:
+  image:
+    repository: chromadb/chroma
+    tag: 0.4.22
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations: {}
+  hosts:
+    - host: workflow-builder.local
+      paths:
+        - path: /
+          pathType: Prefix

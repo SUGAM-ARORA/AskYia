@@ -1,0 +1,4 @@
+apiVersion: v2
+name: workflow-builder
+version: 0.1.0
+description: Helm chart for Workflow Builder stack
