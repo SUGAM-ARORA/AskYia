@@ -19,7 +19,7 @@ const Dashboard = () => {
         <div className="header-left">
           <div className="logo">
             <span className="logo-icon">🟢</span>
-            <span className="logo-text">GenAI Stack</span>
+            <span className="logo-text">AskYia</span>
           </div>
         </div>
         <div className="header-right">

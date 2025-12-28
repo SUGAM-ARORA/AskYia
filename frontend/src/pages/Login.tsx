@@ -8,7 +8,7 @@ const Login = () => {
         <div className="login-header">
           <div className="logo">
             <span className="logo-icon">🟢</span>
-            <span className="logo-text">GenAI Stack</span>
+            <span className="logo-text">AskYia</span>
           </div>
         </div>
         <h2 className="login-title">Welcome back</h2>
