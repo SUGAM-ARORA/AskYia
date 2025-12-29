@@ -18,6 +18,12 @@
   gap: 16px;
 }
 
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .logo {
   display: flex;
   align-items: center;
@@ -30,16 +36,99 @@
   font-size: 20px;
 }
 
+/* User Menu - shared with WorkflowBuilder */
+.user-menu {
+  position: relative;
+}
+
 .user-button {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: var(--primary-green);
   color: white;
   font-weight: 600;
+  font-size: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 2px solid transparent;
+}
+
+.user-button:hover {
+  border-color: var(--primary-green);
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+}
+
+.user-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: var(--card-white);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  min-width: 200px;
+  z-index: 100;
+  animation: dropdownSlide 0.2s ease;
+}
+
+@keyframes dropdownSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.user-dropdown-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.user-dropdown-email {
+  font-size: 13px;
+  color: var(--text-secondary);
+  word-break: break-all;
+}
+
+.user-dropdown-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.user-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 0.2s;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+}
+
+.user-dropdown-item:hover {
+  background: var(--bg-gray);
+}
+
+.user-dropdown-item.danger {
+  color: var(--danger);
+}
+
+.user-dropdown-item.danger:hover {
+  background: #FEF2F2;
 }
 
 .dashboard-main {
@@ -52,7 +141,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 32px;
+  margin-bottom: 16px;
 }
 
 .dashboard-title {
@@ -61,17 +150,26 @@
   color: var(--text-primary);
 }
 
+/* Horizontal divider below My Stacks */
+.dashboard-divider {
+  height: 1px;
+  background: var(--border);
+  margin-bottom: 24px;
+}
+
 .btn-new-stack {
-  background: var(--primary-green);
+  background: linear-gradient(135deg, var(--primary-green) 0%, #45a049 100%);
   color: white;
   padding: 10px 20px;
-  border-radius: 6px;
-  font-weight: 500;
-  transition: background 0.2s;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
 }
 
 .btn-new-stack:hover {
-  background: #45a049;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
 }
 
 .empty-state {
@@ -104,62 +202,156 @@
 }
 
 .btn-new-stack-large {
-  background: var(--primary-green);
+  background: linear-gradient(135deg, var(--primary-green) 0%, #45a049 100%);
   color: white;
-  padding: 12px 24px;
-  border-radius: 6px;
-  font-weight: 500;
+  padding: 14px 28px;
+  border-radius: 8px;
+  font-weight: 600;
   font-size: 15px;
-  transition: background 0.2s;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
 }
 
 .btn-new-stack-large:hover {
-  background: #45a049;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
 }
 
 .stack-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 24px;
 }
 
 .stack-card {
   background: var(--card-white);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 24px;
-  transition: box-shadow 0.2s, transform 0.2s;
-  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
 }
 
 .stack-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px);
+  border-color: var(--primary-green);
+}
+
+.stack-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
 }
 
 .stack-card-title {
   font-size: 18px;
   font-weight: 600;
   color: var(--text-primary);
-  margin-bottom: 8px;
+  flex: 1;
+}
+
+.stack-card-menu {
+  position: relative;
+}
+
+.stack-card-menu-btn {
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  font-size: 18px;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+  border-radius: 4px;
+}
+
+.stack-card-menu-btn:hover {
+  opacity: 1;
+  background: var(--bg-gray);
+}
+
+.stack-card-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: var(--card-white);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 140px;
+  z-index: 50;
+}
+
+.stack-card-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+}
+
+.stack-card-dropdown-item:hover {
+  background: var(--bg-gray);
+}
+
+.stack-card-dropdown-item.danger {
+  color: var(--danger);
+}
+
+.stack-card-dropdown-item.danger:hover {
+  background: #FEF2F2;
 }
 
 .stack-card-description {
   color: var(--text-secondary);
   font-size: 14px;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
   min-height: 40px;
+  line-height: 1.5;
+}
+
+.stack-card-actions {
+  display: flex;
+  gap: 12px;
 }
 
 .stack-card-action {
-  color: var(--primary-green);
+  flex: 1;
+  padding: 10px 16px;
+  border-radius: 6px;
   font-weight: 500;
-  background: none;
-  padding: 0;
-  text-align: left;
-  transition: color 0.2s;
+  font-size: 13px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
-.stack-card-action:hover {
-  color: #45a049;
+.stack-card-action.primary {
+  background: var(--primary-green);
+  color: white;
+}
+
+.stack-card-action.primary:hover {
+  background: #45a049;
+}
+
+.stack-card-action.secondary {
+  background: var(--bg-gray);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+
+.stack-card-action.secondary:hover {
+  background: var(--border);
 }

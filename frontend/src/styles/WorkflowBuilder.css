@@ -33,45 +33,143 @@
   flex-shrink: 0;
 }
 
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .workflow-content {
   display: flex;
   flex: 1;
   overflow: hidden;
 }
 
+/* Sidebar Styles */
 .component-library {
-  width: 240px;
+  width: 220px;
   background: var(--card-white);
   border-right: 1px solid var(--border);
-  padding: 16px;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
   flex-shrink: 0;
 }
 
-.sidebar-title {
+/* Sidebar Tabs */
+.sidebar-tabs {
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sidebar-tab {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--bg-gray);
+  border: 1px solid var(--border);
+  border-radius: 8px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text-primary);
-  margin-bottom: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sidebar-tab:hover {
+  background: var(--light-green);
+  border-color: var(--primary-green);
+}
+
+.sidebar-tab.active {
+  background: var(--light-green);
+  border-color: var(--primary-green);
+  color: var(--primary-green);
+}
+
+.tab-icon {
+  font-size: 16px;
+}
+
+/* Sidebar Chat Placeholder */
+.sidebar-chat {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.chat-placeholder {
+  text-align: center;
+  padding: 20px;
+  background: var(--bg-gray);
+  border-radius: 8px;
+}
+
+.chat-placeholder-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.chat-placeholder p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.btn-open-chat {
+  background: var(--primary-green);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.btn-open-chat:hover {
+  background: #45a049;
+}
+
+/* Components Section */
+.components-section {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.sidebar-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
 }
 
 .component-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .component-item {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px;
+  padding: 10px 12px;
   background: var(--bg-gray);
   border: 1px solid var(--border);
   border-radius: 6px;
   cursor: grab;
   transition: all 0.2s;
   user-select: none;
+  font-size: 13px;
 }
 
 .component-item:active {
@@ -85,22 +183,16 @@
 }
 
 .component-icon {
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .component-label {
   flex: 1;
-  font-size: 14px;
   font-weight: 500;
   color: var(--text-primary);
 }
 
-.drag-handle {
-  font-size: 16px;
-  color: var(--text-secondary);
-  opacity: 0.5;
-}
-
+/* Canvas Container */
 .canvas-container {
   flex: 1;
   position: relative;
@@ -133,22 +225,78 @@
   opacity: 0.6;
 }
 
+/* Zoom Controls - Bottom Center */
+.zoom-controls {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--card-white);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.zoom-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: 4px;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  transition: background 0.2s;
+}
+
+.zoom-btn:hover {
+  background: var(--bg-gray);
+}
+
+.zoom-level-dropdown {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-left: 1px solid var(--border);
+  margin-left: 4px;
+}
+
+.dropdown-arrow {
+  font-size: 10px;
+  opacity: 0.6;
+}
+
+/* Floating Actions - Bottom Right */
 .floating-actions {
   position: absolute;
   bottom: 24px;
   right: 24px;
   display: flex;
   flex-direction: column;
+  align-items: flex-end;
   gap: 12px;
   z-index: 10;
 }
 
 .fab {
-  width: 56px;
-  height: 56px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   border: none;
-  font-size: 24px;
+  font-size: 20px;
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transition: all 0.2s;
@@ -162,6 +310,10 @@
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
 
+.fab:active {
+  transform: scale(0.95);
+}
+
 .fab-run {
   background: var(--primary-green);
   color: white;
@@ -170,8 +322,32 @@
 .fab-chat {
   background: white;
   border: 2px solid var(--border);
+  color: var(--text-primary);
 }
 
+.fab-chat:hover {
+  border-color: var(--primary-green);
+  background: var(--light-green);
+}
+
+/* Build Stack Container */
+.build-stack-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.build-stack-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--card-white);
+  padding: 8px 14px;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Stack Name */
 .stack-name {
   display: flex;
   align-items: center;
@@ -181,6 +357,12 @@
   border-radius: 6px;
   font-size: 14px;
   font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.stack-name:hover {
+  background: var(--border);
 }
 
 .edit-icon {
@@ -188,21 +370,28 @@
   opacity: 0.6;
 }
 
+/* Save Button */
 .btn-save {
-  background: var(--primary-green);
+  background: linear-gradient(135deg, var(--primary-green) 0%, #45a049 100%);
   color: white;
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-weight: 500;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
   font-size: 14px;
   display: flex;
   align-items: center;
-  gap: 6px;
-  transition: background 0.2s;
+  gap: 8px;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
 }
 
 .btn-save:hover {
-  background: #45a049;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+.btn-save:active {
+  transform: translateY(0);
 }
 
 /* React Flow overrides */
@@ -215,7 +404,7 @@
 }
 
 .react-flow__edge-path {
-  stroke: var(--text-secondary);
+  stroke: #9CA3AF;
   stroke-width: 2;
 }
 
@@ -224,15 +413,100 @@
 }
 
 .react-flow__controls {
-  bottom: 100px;
+  display: none;
 }
 
-.react-flow__controls-button {
-  background: white;
+/* User Menu (shared styles) */
+.user-menu {
+  position: relative;
+}
+
+.user-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--primary-green);
+  color: white;
+  font-weight: 600;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 2px solid transparent;
+}
+
+.user-button:hover {
+  border-color: var(--primary-green);
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+}
+
+.user-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: var(--card-white);
   border: 1px solid var(--border);
-  color: var(--text-primary);
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  min-width: 200px;
+  z-index: 100;
+  animation: dropdownSlide 0.2s ease;
 }
 
-.react-flow__controls-button:hover {
+@keyframes dropdownSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.user-dropdown-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.user-dropdown-email {
+  font-size: 13px;
+  color: var(--text-secondary);
+  word-break: break-all;
+}
+
+.user-dropdown-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.user-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 0.2s;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+}
+
+.user-dropdown-item:hover {
   background: var(--bg-gray);
+}
+
+.user-dropdown-item.danger {
+  color: var(--danger);
+}
+
+.user-dropdown-item.danger:hover {
+  background: #FEF2F2;
 }

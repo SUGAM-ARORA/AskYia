@@ -14,10 +14,28 @@
   letter-spacing: -0.5px;
 }
 
+.logo-container.small {
+  gap: 6px;
+}
+
 .logo-container.small .logo-text {
   font-size: 16px;
 }
 
+.logo-container.large {
+  gap: 12px;
+}
+
 .logo-container.large .logo-text {
   font-size: 28px;
+}
+
+/* Animation on hover */
+.logo-container:hover svg {
+  transform: rotate(5deg) scale(1.05);
+  transition: transform 0.3s ease;
+}
+
+.logo-container svg {
+  transition: transform 0.3s ease;
 }

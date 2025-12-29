@@ -30,34 +30,36 @@ const InputNode = ({ data }: { data: InputNodeData }) => {
       </div>
 
       {isExpanded && (
-        <>
-          <div className="node-divider"></div>
-          <div className="node-body">
-            <p className="node-description">Enter point for queries</p>
+        <div className="node-body">
+          <p className="node-description">Entry point for user queries</p>
 
-            <div className="form-group">
-              <label className="form-label-small">User Query</label>
-              <textarea
-                className="form-input-small"
-                placeholder="Write your query here"
-                value={query}
-                onChange={(e) => handleQueryChange(e.target.value)}
-                rows={3}
-              />
-            </div>
+          <div className="form-group">
+            <label className="form-label-small">User Query</label>
+            <textarea
+              className="form-input-small"
+              placeholder="Write your query here"
+              value={query}
+              onChange={(e) => handleQueryChange(e.target.value)}
+              rows={3}
+            />
           </div>
-        </>
+        </div>
       )}
 
-      <Handle
-        type="source"
-        position={Position.Right}
-        id="query"
-        className="handle-orange"
-        style={{ top: "50%" }}
-      >
-        <div className="handle-label">Query</div>
-      </Handle>
+      {/* Footer with Handle - Query on bottom right */}
+      <div className="node-footer">
+        <div></div>
+        <div className="footer-handle">
+          <span className="footer-handle-label">Query</span>
+          <Handle
+            type="source"
+            position={Position.Bottom}
+            id="query"
+            className="handle-orange"
+            style={{ position: "relative", transform: "none" }}
+          />
+        </div>
+      </div>
     </div>
   );
 };

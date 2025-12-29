@@ -1,35 +1,31 @@
 import { useState } from "react";
-import { useStackStore } from "../../store/stackSlice";
-import { v4 as uuidv4 } from "uuid";
+import { useStackStore, Stack } from "../../store/stackSlice";
 import "../../styles/Modal.css";
 
-interface CreateStackModalProps {
+interface EditStackModalProps {
+  stack: Stack;
   onClose: () => void;
 }
 
-const CreateStackModal = ({ onClose }: CreateStackModalProps) => {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const { addStack } = useStackStore();
+const EditStackModal = ({ stack, onClose }: EditStackModalProps) => {
+  const [name, setName] = useState(stack.name);
+  const [description, setDescription] = useState(stack.description);
+  const { updateStack } = useStackStore();
 
-  const handleCreate = () => {
+  const handleSave = () => {
     if (!name.trim()) return;
 
-    const newStack = {
-      id: uuidv4(),
+    updateStack(stack.id, {
       name: name.trim(),
       description: description.trim(),
-      createdAt: new Date(),
       updatedAt: new Date(),
-    };
-
-    addStack(newStack);
+    });
     onClose();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-      handleCreate();
+      handleSave();
     }
   };
 
@@ -37,7 +33,7 @@ const CreateStackModal = ({ onClose }: CreateStackModalProps) => {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2 className="modal-title">Create New Stack</h2>
+          <h2 className="modal-title">Edit Stack</h2>
           <button className="modal-close" onClick={onClose}>
             ✕
           </button>
@@ -49,7 +45,7 @@ const CreateStackModal = ({ onClose }: CreateStackModalProps) => {
             <input
               type="text"
               className="form-input"
-              placeholder="Your Stack name"
+              placeholder="Stack name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -61,7 +57,7 @@ const CreateStackModal = ({ onClose }: CreateStackModalProps) => {
             <label className="form-label">Description</label>
             <textarea
               className="form-textarea"
-              placeholder="Your Stack description"
+              placeholder="Stack description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={4}
@@ -75,10 +71,10 @@ const CreateStackModal = ({ onClose }: CreateStackModalProps) => {
           </button>
           <button
             className="btn-primary"
-            onClick={handleCreate}
+            onClick={handleSave}
             disabled={!name.trim()}
           >
-            Create
+            Save Changes
           </button>
         </div>
       </div>
@@ -86,4 +82,4 @@ const CreateStackModal = ({ onClose }: CreateStackModalProps) => {
   );
 };
 
-export default CreateStackModal;
+export default EditStackModal;

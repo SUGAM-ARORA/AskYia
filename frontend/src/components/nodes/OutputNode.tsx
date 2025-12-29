@@ -22,32 +22,32 @@ const OutputNode = ({ data }: { data: OutputNodeData }) => {
       </div>
 
       {isExpanded && (
-        <>
-          <div className="node-divider"></div>
-          <div className="node-body">
-            <p className="node-description">
-              Output of the result nodes as text
-            </p>
+        <div className="node-body">
+          <p className="node-description">Output of the result nodes as text</p>
 
-            <div className="form-group">
-              <label className="form-label-small">Output Text</label>
-              <div className="output-preview">
-                {data.output || "Output will be generated based on query"}
-              </div>
+          <div className="form-group">
+            <label className="form-label-small">Output Text</label>
+            <div className="output-preview">
+              {data.output || "Output will be generated based on query"}
             </div>
           </div>
-        </>
+        </div>
       )}
 
-      <Handle
-        type="target"
-        position={Position.Left}
-        id="output"
-        className="handle-green"
-        style={{ top: "50%" }}
-      >
-        <div className="handle-label-left">Output</div>
-      </Handle>
+      {/* Footer with Output handle on bottom left */}
+      <div className="node-footer">
+        <div className="footer-handle">
+          <span className="footer-handle-label">Output</span>
+          <Handle
+            type="target"
+            position={Position.Bottom}
+            id="output"
+            className="handle-green"
+            style={{ position: "relative", transform: "none" }}
+          />
+        </div>
+        <div></div>
+      </div>
     </div>
   );
 };

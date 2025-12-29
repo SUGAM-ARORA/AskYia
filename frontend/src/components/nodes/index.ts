@@ -3,3 +3,8 @@ export { default as LLMNode } from './LLMNode';
 export { default as KnowledgeBaseNode } from './KnowledgeBaseNode';
 export { default as WebSearchNode } from './WebSearchNode';
 export { default as OutputNode } from './OutputNode';
+export { default as ConditionalNode } from './ConditionalNode';
+export { default as TransformNode } from './TransformNode';
+export { default as APINode } from './APINode';
+export { default as MemoryNode } from './MemoryNode';
+export { default as ValidatorNode } from './ValidatorNode';

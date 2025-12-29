@@ -130,7 +130,7 @@ The workflow executor implements a simplified DAG execution model:
 
 ## Figma Design Reference
 
-> [Figma Design URL placeholder - replace with actual link per assignment]
+> [Figma Design URL placeholder - [assignment](https://www.figma.com/design/RVtXQB4bzKSlHrtejIQqMH/Assignment--FullStack-Engineer?node-id=0-1&p=f&t=4ZELPyGhGwi4THlR-0)]
 
 ## Future Enhancements
 

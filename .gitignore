@@ -7,3 +7,13 @@ build/
 .vscode/
 .DS_Store
 *.log
+mine
+docs/deployment-guide.md
+docs/run-guide.md
+frontend/QUICKSTART.md
+frontend/SAMPLE_WORKFLOWS.md
+start-local.bat
+start-local.sh
+start.bat
+start.sh
+START.md

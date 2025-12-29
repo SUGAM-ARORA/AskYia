@@ -1,4 +1,5 @@
 import LoginForm from "../components/auth/LoginForm";
+import Logo from "../components/common/Logo";
 import "../styles/Login.css";
 
 const Login = () => {
@@ -6,10 +7,7 @@ const Login = () => {
     <div className="login-container">
       <div className="login-card">
         <div className="login-header">
-          <div className="logo">
-            <span className="logo-icon">🟢</span>
-            <span className="logo-text">AskYia</span>
-          </div>
+          <Logo size={40} showText={true} />
         </div>
         <h2 className="login-title">Welcome back</h2>
         <p className="login-subtitle">Sign in to continue building AI stacks</p>
