@@ -11,10 +11,12 @@ export interface InputNodeData extends NodeData {
 }
 
 export interface LLMNodeData extends NodeData {
+  provider?: string;  // Added: "gemini" | "openai"
   model?: string;
   apiKey?: string;
   prompt?: string;
   temperature?: number;
+  maxTokens?: number;  // Added
   webSearch?: boolean;
   serpApiKey?: string;
 }

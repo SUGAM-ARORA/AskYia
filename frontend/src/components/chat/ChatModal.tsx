@@ -1,19 +1,32 @@
 import { useState, useRef, useEffect } from "react";
 import { useWorkflowStore } from "../../store/workflowSlice";
+import { api } from "../../services/api";
 import "../../styles/Chat.css";
 
 interface Message {
   id: string;
-  role: "user" | "assistant";
+  role: "user" | "assistant" | "error";
   content: string;
   timestamp: Date;
 }
 
+interface WorkflowDefinition {
+  nodes: any[];
+  edges: any[];
+  knowledge_base_enabled?: boolean;
+  prompt?: string;
+  model?: string;
+  provider?: string;
+  temperature?: number;
+  web_search?: boolean;
+}
+
 const ChatModal = () => {
-  const { toggleChat } = useWorkflowStore();
+  const { toggleChat, nodes, edges } = useWorkflowStore();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [webSearchEnabled, setWebSearchEnabled] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -23,6 +36,54 @@ const ChatModal = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Build workflow definition from nodes and edges
+  const buildWorkflowDefinition = (): WorkflowDefinition => {
+    const workflowDef: WorkflowDefinition = {
+      nodes: nodes,
+      edges: edges,
+      knowledge_base_enabled: false,
+      prompt: undefined,
+      model: undefined,
+      provider: undefined,
+      temperature: undefined,
+      web_search: webSearchEnabled,
+    };
+
+    // Extract settings from nodes
+    nodes.forEach((node) => {
+      const nodeType = node.type?.toLowerCase();
+      const nodeData = node.data || {};
+
+      switch (nodeType) {
+        case "knowledgebase":
+        case "knowledge_base":
+        case "knowledge":
+        case "kb":
+          workflowDef.knowledge_base_enabled = nodeData.enabled ?? true;
+          break;
+        case "llmengine":
+        case "llm_engine":
+        case "llm":
+          workflowDef.model = nodeData.model || "gemini-2.0-flash";
+          workflowDef.provider = nodeData.provider || "gemini";
+          workflowDef.temperature = nodeData.temperature ?? 0.7;
+          workflowDef.prompt = nodeData.prompt;
+          // Check if web search is enabled in the node
+          if (nodeData.webSearch) {
+            workflowDef.web_search = true;
+          }
+          break;
+        case "prompt":
+          if (nodeData.prompt) {
+            workflowDef.prompt = nodeData.prompt;
+          }
+          break;
+      }
+    });
+
+    return workflowDef;
+  };
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
@@ -38,17 +99,54 @@ const ChatModal = () => {
     setInput("");
     setIsLoading(true);
 
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      // Build workflow definition from current nodes/edges
+      const workflowDefinition = buildWorkflowDefinition();
+
+      // Call real backend API
+      const response = await api.post("/chat/ask", {
+        query: userMessage.content,
+        workflow_definition: workflowDefinition,
+        prompt: workflowDefinition.prompt,
+        web_search: webSearchEnabled || workflowDefinition.web_search,
+      });
+
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: `This is a simulated response to: "${userMessage.content}". In a real implementation, this would connect to your workflow execution backend.`,
+        content: response.data.answer || "No response received.",
         timestamp: new Date(),
       };
+
       setMessages((prev) => [...prev, aiMessage]);
+    } catch (error: any) {
+      console.error("Chat API error:", error);
+
+      // Extract error message
+      let errorContent = "Sorry, something went wrong. Please try again.";
+
+      if (error.response?.data?.detail) {
+        errorContent = `Error: ${error.response.data.detail}`;
+      } else if (error.response?.status === 500) {
+        errorContent = "Server error. Please check if the backend is running.";
+      } else if (error.code === "ERR_NETWORK") {
+        errorContent =
+          "Cannot connect to server. Please ensure the backend is running at http://localhost:8001";
+      } else if (error.message) {
+        errorContent = `Error: ${error.message}`;
+      }
+
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "error",
+        content: errorContent,
+        timestamp: new Date(),
+      };
+
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -58,6 +156,10 @@ const ChatModal = () => {
     }
   };
 
+  const clearChat = () => {
+    setMessages([]);
+  };
+
   return (
     <div className="chat-modal-overlay" onClick={toggleChat}>
       <div className="chat-modal" onClick={(e) => e.stopPropagation()}>
@@ -65,16 +167,41 @@ const ChatModal = () => {
           <div className="chat-title">
             <span className="chat-icon">🟢</span>
             <span>AskYiaChat</span>
+            {nodes.length > 0 && (
+              <span className="chat-node-count">({nodes.length} nodes)</span>
+            )}
           </div>
-          <button className="chat-close" onClick={toggleChat}>
-            ✕
-          </button>
+          <div className="chat-header-actions">
+            {/* Web Search Toggle */}
+            <button
+              className={`chat-web-toggle ${webSearchEnabled ? "active" : ""}`}
+              onClick={() => setWebSearchEnabled(!webSearchEnabled)}
+              title="Toggle web search"
+            >
+              🌐 Web
+            </button>
+            {/* Clear Chat */}
+            <button 
+              className="chat-clear" 
+              onClick={clearChat} 
+              title="Clear chat"
+            >
+              🗑️
+            </button>
+            {/* Close */}
+            <button className="chat-close" onClick={toggleChat}>
+              ✕
+            </button>
+          </div>
         </div>
 
         <div className="chat-messages">
           {messages.length === 0 ? (
             <div className="chat-empty">
               <p>Start a conversation with your AI stack</p>
+              {webSearchEnabled && (
+                <p className="chat-web-notice">🌐 Web search is enabled</p>
+              )}
             </div>
           ) : (
             messages.map((message) => (
@@ -83,7 +210,11 @@ const ChatModal = () => {
                 className={`chat-message ${message.role}`}
               >
                 <div className="message-icon">
-                  {message.role === "user" ? "👷" : "🟢"}
+                  {message.role === "user"
+                    ? "👷"
+                    : message.role === "error"
+                    ? "⚠️"
+                    : "🟢"}
                 </div>
                 <div className="message-content">{message.content}</div>
               </div>
@@ -103,22 +234,29 @@ const ChatModal = () => {
         </div>
 
         <div className="chat-input-container">
-          <input
-            type="text"
-            className="chat-input"
-            placeholder="Send a message"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            disabled={isLoading}
-          />
-          <button
-            className="chat-send"
-            onClick={handleSend}
-            disabled={!input.trim() || isLoading}
-          >
-            ➤
-          </button>
+          {webSearchEnabled && (
+            <div className="chat-web-indicator">
+              🌐 Web search enabled - AI will search the internet
+            </div>
+          )}
+          <div className="chat-input-row">
+            <input
+              type="text"
+              className="chat-input"
+              placeholder="Send a message..."
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              disabled={isLoading}
+            />
+            <button
+              className="chat-send"
+              onClick={handleSend}
+              disabled={!input.trim() || isLoading}
+            >
+              {isLoading ? "..." : "➤"}
+            </button>
+          </div>
         </div>
       </div>
     </div>

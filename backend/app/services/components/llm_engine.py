@@ -31,29 +31,39 @@ class LLMEngineComponent(Component):
             logger.warning("llm_engine_no_query")
             return {"answer": "No query provided.", "error": True}
         
-        # Log what we're working with
         logger.info(
             "llm_engine_start",
             query_length=len(query),
-            context_length=len(kb_context),
-            has_context=bool(kb_context)
+            kb_context_length=len(kb_context),
+            web_search_enabled=payload.get("web_search", False)
         )
         
         # Web search augmentation (if enabled)
+        web_context = ""
         if payload.get("web_search") and self.search:
             try:
-                search_results = await self.search.search(query)
-                if search_results:
+                logger.info("web_search_executing", query=query[:50])
+                search_results = await self.search.search(query, num_results=3)
+                
+                if search_results and "No results" not in search_results:
                     web_context = f"\n\n### Web Search Results:\n{search_results}"
-                    kb_context = (kb_context + web_context) if kb_context else web_context
+                    logger.info("web_search_added", length=len(web_context))
+                    
             except Exception as e:
                 logger.warning("web_search_failed", error=str(e))
+        
+        # Combine all context
+        full_context = ""
+        if kb_context:
+            full_context += f"### Retrieved Documents:\n{kb_context}"
+        if web_context:
+            full_context += web_context
         
         # Generate response
         try:
             answer = await self.llm.generate(
                 query=query,
-                context=kb_context if kb_context else None,
+                context=full_context if full_context else None,
                 prompt=prompt,
                 temperature=payload.get("temperature", 0.7),
                 max_tokens=payload.get("max_tokens", 1024)
@@ -64,10 +74,15 @@ class LLMEngineComponent(Component):
             logger.info(
                 "llm_engine_success",
                 answer_length=len(answer),
-                used_context=bool(kb_context)
+                used_kb=bool(kb_context),
+                used_web=bool(web_context)
             )
             
-            return {"answer": answer, "used_context": bool(kb_context)}
+            return {
+                "answer": answer,
+                "used_context": bool(kb_context),
+                "used_web_search": bool(web_context)
+            }
             
         except Exception as e:
             error_msg = f"LLM generation failed: {str(e)}"
