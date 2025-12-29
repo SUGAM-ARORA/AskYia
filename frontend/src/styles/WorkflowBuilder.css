@@ -510,3 +510,60 @@
 .user-dropdown-item.danger:hover {
   background: #FEF2F2;
 }
+
+.sidebar-settings {
+  padding: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.setting-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.setting-item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.btn-icon {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--bg-gray);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-icon:hover {
+  background: var(--border);
+}
+
+.btn-import-template {
+  margin-top: 16px;
+  padding: 10px 20px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--primary-green);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-import-template:hover {
+  background: var(--light-green);
+  border-color: var(--primary-green);
+}

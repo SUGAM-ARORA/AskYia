@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useWorkflowStore } from "../../store/workflowSlice";
 import { api } from "../../services/api";
+import Logo from "../common/Logo";
 import "../../styles/Chat.css";
 
 interface Message {
@@ -37,7 +38,6 @@ const ChatModal = () => {
     scrollToBottom();
   }, [messages]);
 
-  // Build workflow definition from nodes and edges
   const buildWorkflowDefinition = (): WorkflowDefinition => {
     const workflowDef: WorkflowDefinition = {
       nodes: nodes,
@@ -50,7 +50,6 @@ const ChatModal = () => {
       web_search: webSearchEnabled,
     };
 
-    // Extract settings from nodes
     nodes.forEach((node) => {
       const nodeType = node.type?.toLowerCase();
       const nodeData = node.data || {};
@@ -69,7 +68,6 @@ const ChatModal = () => {
           workflowDef.provider = nodeData.provider || "gemini";
           workflowDef.temperature = nodeData.temperature ?? 0.7;
           workflowDef.prompt = nodeData.prompt;
-          // Check if web search is enabled in the node
           if (nodeData.webSearch) {
             workflowDef.web_search = true;
           }
@@ -100,10 +98,8 @@ const ChatModal = () => {
     setIsLoading(true);
 
     try {
-      // Build workflow definition from current nodes/edges
       const workflowDefinition = buildWorkflowDefinition();
 
-      // Call real backend API
       const response = await api.post("/chat/ask", {
         query: userMessage.content,
         workflow_definition: workflowDefinition,
@@ -122,7 +118,6 @@ const ChatModal = () => {
     } catch (error: any) {
       console.error("Chat API error:", error);
 
-      // Extract error message
       let errorContent = "Sorry, something went wrong. Please try again.";
 
       if (error.response?.data?.detail) {
@@ -165,14 +160,13 @@ const ChatModal = () => {
       <div className="chat-modal" onClick={(e) => e.stopPropagation()}>
         <div className="chat-header">
           <div className="chat-title">
-            <span className="chat-icon">🟢</span>
+            <Logo size={24} showText={false} />
             <span>AskYiaChat</span>
             {nodes.length > 0 && (
               <span className="chat-node-count">({nodes.length} nodes)</span>
             )}
           </div>
           <div className="chat-header-actions">
-            {/* Web Search Toggle */}
             <button
               className={`chat-web-toggle ${webSearchEnabled ? "active" : ""}`}
               onClick={() => setWebSearchEnabled(!webSearchEnabled)}
@@ -180,15 +174,13 @@ const ChatModal = () => {
             >
               🌐 Web
             </button>
-            {/* Clear Chat */}
-            <button 
-              className="chat-clear" 
-              onClick={clearChat} 
+            <button
+              className="chat-clear"
+              onClick={clearChat}
               title="Clear chat"
             >
               🗑️
             </button>
-            {/* Close */}
             <button className="chat-close" onClick={toggleChat}>
               ✕
             </button>
@@ -198,6 +190,7 @@ const ChatModal = () => {
         <div className="chat-messages">
           {messages.length === 0 ? (
             <div className="chat-empty">
+              <Logo size={48} showText={false} />
               <p>Start a conversation with your AI stack</p>
               {webSearchEnabled && (
                 <p className="chat-web-notice">🌐 Web search is enabled</p>
@@ -205,16 +198,15 @@ const ChatModal = () => {
             </div>
           ) : (
             messages.map((message) => (
-              <div
-                key={message.id}
-                className={`chat-message ${message.role}`}
-              >
+              <div key={message.id} className={`chat-message ${message.role}`}>
                 <div className="message-icon">
-                  {message.role === "user"
-                    ? "👷"
-                    : message.role === "error"
-                    ? "⚠️"
-                    : "🟢"}
+                  {message.role === "user" ? (
+                    "👤"
+                  ) : message.role === "error" ? (
+                    "⚠️"
+                  ) : (
+                    <Logo size={24} showText={false} />
+                  )}
                 </div>
                 <div className="message-content">{message.content}</div>
               </div>
@@ -222,7 +214,9 @@ const ChatModal = () => {
           )}
           {isLoading && (
             <div className="chat-message assistant">
-              <div className="message-icon">🟢</div>
+              <div className="message-icon">
+                <Logo size={24} showText={false} />
+              </div>
               <div className="message-content loading">
                 <span className="dot">.</span>
                 <span className="dot">.</span>

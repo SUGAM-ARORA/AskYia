@@ -10,6 +10,7 @@ import ReactFlow, {
   NodeTypes,
   useReactFlow,
   ReactFlowProvider,
+  MiniMap,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import { v4 as uuidv4 } from "uuid";
@@ -21,7 +22,6 @@ import KnowledgeBaseNode from "../components/nodes/KnowledgeBaseNode";
 import WebSearchNode from "../components/nodes/WebSearchNode";
 import OutputNode from "../components/nodes/OutputNode";
 import ConditionalNode from "../components/nodes/ConditionalNode";
-import TransformNode from "../components/nodes/TransformNode";
 import APINode from "../components/nodes/APINode";
 import MemoryNode from "../components/nodes/MemoryNode";
 import ValidatorNode from "../components/nodes/ValidatorNode";
@@ -29,7 +29,10 @@ import ChatModal from "../components/chat/ChatModal";
 import UserMenu from "../components/common/UserMenu";
 import Logo from "../components/common/Logo";
 import SaveWorkflowModal from "../components/common/SaveWorkflowModal";
+import ImportConfigModal from "../components/common/ImportConfigModal";
+import Tooltip from "../components/common/Tooltip";
 import "../styles/WorkflowBuilder.css";
+import TransformNode from "../components/nodes/TransformNode";
 
 const nodeTypes: NodeTypes = {
   input: InputNode,
@@ -45,17 +48,74 @@ const nodeTypes: NodeTypes = {
 };
 
 const COMPONENTS = [
-  { type: "input", icon: "📥", label: "User Query", category: "input" },
-  { type: "llm", icon: "✨", label: "LLM (OpenAI)", category: "ai" },
-  { type: "knowledge", icon: "📚", label: "Knowledge Base", category: "data" },
-  { type: "webSearch", icon: "🌐", label: "Web Search", category: "data" },
-  { type: "output", icon: "📤", label: "Output", category: "output" },
-  { type: "conditional", icon: "🔀", label: "Conditional", category: "logic" },
-  { type: "transform", icon: "🔄", label: "Transform", category: "logic" },
-  { type: "api", icon: "🔌", label: "API Call", category: "integration" },
-  { type: "memory", icon: "🧠", label: "Memory", category: "ai" },
-  { type: "validator", icon: "✅", label: "Validator", category: "logic" },
+  { type: "input", icon: "📥", label: "User Query", category: "input", tooltip: "Entry point for user queries" },
+  { type: "llm", icon: "✨", label: "LLM (OpenAI)", category: "ai", tooltip: "Process queries with LLM models" },
+  { type: "knowledge", icon: "📚", label: "Knowledge Base", category: "data", tooltip: "Search information in uploaded documents" },
+  { type: "webSearch", icon: "🌐", label: "Web Search", category: "data", tooltip: "Search the web for information" },
+  { type: "output", icon: "📤", label: "Output", category: "output", tooltip: "Display final results" },
+  { type: "conditional", icon: "🔀", label: "Conditional", category: "logic", tooltip: "Route flow based on conditions" },
+  { type: "transform", icon: "🔄", label: "Transform", category: "logic", tooltip: "Transform or format data" },
+  { type: "api", icon: "🔌", label: "API Call", category: "integration", tooltip: "Make external API requests" },
+  { type: "memory", icon: "🧠", label: "Memory", category: "ai", tooltip: "Store conversation history" },
+  { type: "validator", icon: "✅", label: "Validator", category: "logic", tooltip: "Validate and filter data" },
 ];
+
+// Predefined workflow templates
+const WORKFLOW_TEMPLATES = [
+  {
+    name: "Simple Chat",
+    description: "Basic user query to LLM flow",
+    nodes: [
+      { id: "1", type: "input", position: { x: 100, y: 200 }, data: { label: "input" } },
+      { id: "2", type: "llm", position: { x: 400, y: 200 }, data: { label: "llm" } },
+      { id: "3", type: "output", position: { x: 700, y: 200 }, data: { label: "output" } },
+    ],
+    edges: [
+      { id: "e1-2", source: "1", target: "2", sourceHandle: "query", targetHandle: "query" },
+      { id: "e2-3", source: "2", target: "3", sourceHandle: "output", targetHandle: "output" },
+    ],
+  },
+  {
+    name: "PDF Chat",
+    description: "Chat with PDF documents using knowledge base",
+    nodes: [
+      { id: "1", type: "input", position: { x: 100, y: 150 }, data: { label: "input" } },
+      { id: "2", type: "knowledge", position: { x: 100, y: 350 }, data: { label: "knowledge" } },
+      { id: "3", type: "llm", position: { x: 450, y: 250 }, data: { label: "llm" } },
+      { id: "4", type: "output", position: { x: 750, y: 250 }, data: { label: "output" } },
+    ],
+    edges: [
+      { id: "e1-2", source: "1", target: "2", sourceHandle: "query", targetHandle: "query" },
+      { id: "e1-3", source: "1", target: "3", sourceHandle: "query", targetHandle: "query" },
+      { id: "e2-3", source: "2", target: "3", sourceHandle: "context", targetHandle: "context" },
+      { id: "e3-4", source: "3", target: "4", sourceHandle: "output", targetHandle: "output" },
+    ],
+  },
+  {
+    name: "Web Search Agent",
+    description: "Search the web and process results with LLM",
+    nodes: [
+      { id: "1", type: "input", position: { x: 100, y: 200 }, data: { label: "input" } },
+      { id: "2", type: "webSearch", position: { x: 350, y: 200 }, data: { label: "webSearch" } },
+      { id: "3", type: "llm", position: { x: 600, y: 200 }, data: { label: "llm" } },
+      { id: "4", type: "output", position: { x: 850, y: 200 }, data: { label: "output" } },
+    ],
+    edges: [
+      { id: "e1-2", source: "1", target: "2", sourceHandle: "query", targetHandle: "query" },
+      { id: "e2-3", source: "2", target: "3", sourceHandle: "results", targetHandle: "context" },
+      { id: "e1-3", source: "1", target: "3", sourceHandle: "query", targetHandle: "query" },
+      { id: "e3-4", source: "3", target: "4", sourceHandle: "output", targetHandle: "output" },
+    ],
+  },
+];
+
+// Grid size for snap-to-grid
+const GRID_SIZE = 20;
+
+const snapToGrid = (position: { x: number; y: number }) => ({
+  x: Math.round(position.x / GRID_SIZE) * GRID_SIZE,
+  y: Math.round(position.y / GRID_SIZE) * GRID_SIZE,
+});
 
 const WorkflowBuilderContent = () => {
   const { currentStack } = useStackStore();
@@ -63,8 +123,10 @@ const WorkflowBuilderContent = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [zoom, setZoom] = useState(100);
   const [activeTab, setActiveTab] = useState<"chat" | "components">("components");
+  const [snapToGridEnabled, setSnapToGridEnabled] = useState(true);
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const { zoomIn, zoomOut, fitView, getZoom } = useReactFlow();
 
@@ -88,10 +150,15 @@ const WorkflowBuilderContent = () => {
       const reactFlowBounds = reactFlowWrapper.current?.getBoundingClientRect();
       if (!reactFlowBounds) return;
 
-      const position = {
+      let position = {
         x: event.clientX - reactFlowBounds.left - 150,
         y: event.clientY - reactFlowBounds.top - 50,
       };
+
+      // Apply snap-to-grid if enabled
+      if (snapToGridEnabled) {
+        position = snapToGrid(position);
+      }
 
       const newNode: Node = {
         id: uuidv4(),
@@ -113,7 +180,22 @@ const WorkflowBuilderContent = () => {
 
       setNodes((nds) => nds.concat(newNode));
     },
-    [setNodes]
+    [setNodes, snapToGridEnabled]
+  );
+
+  // Handle node drag end with snap-to-grid
+  const onNodeDragStop = useCallback(
+    (_: any, node: Node) => {
+      if (snapToGridEnabled) {
+        const snappedPosition = snapToGrid(node.position);
+        setNodes((nds) =>
+          nds.map((n) =>
+            n.id === node.id ? { ...n, position: snappedPosition } : n
+          )
+        );
+      }
+    },
+    [setNodes, snapToGridEnabled]
   );
 
   const handleSave = () => {
@@ -123,6 +205,73 @@ const WorkflowBuilderContent = () => {
   const handleBuildStack = () => {
     console.log("Building stack:", { nodes, edges });
     alert("Building stack... Check console for workflow definition.");
+  };
+
+  const handleImportTemplate = (template: typeof WORKFLOW_TEMPLATES[0]) => {
+    // Add onUpdate handlers to nodes
+    const nodesWithHandlers = template.nodes.map((node) => ({
+      ...node,
+      id: uuidv4(),
+      data: {
+        ...node.data,
+        onUpdate: (updates: any) => {
+          setNodes((nds) =>
+            nds.map((n) =>
+              n.id === node.id ? { ...n, data: { ...n.data, ...updates } } : n
+            )
+          );
+        },
+      },
+    }));
+
+    // Update edge references
+    const nodeIdMap: Record<string, string> = {};
+    template.nodes.forEach((oldNode, index) => {
+      nodeIdMap[oldNode.id] = nodesWithHandlers[index].id;
+    });
+
+    const updatedEdges = template.edges.map((edge) => ({
+      ...edge,
+      id: uuidv4(),
+      source: nodeIdMap[edge.source],
+      target: nodeIdMap[edge.target],
+      animated: true,
+    }));
+
+    setNodes(nodesWithHandlers);
+    setEdges(updatedEdges);
+    setIsImportModalOpen(false);
+  };
+
+  const handleImportJSON = (config: { nodes: any[]; edges: any[] }) => {
+    const nodesWithHandlers = config.nodes.map((node) => ({
+      ...node,
+      data: {
+        ...node.data,
+        onUpdate: (updates: any) => {
+          setNodes((nds) =>
+            nds.map((n) =>
+              n.id === node.id ? { ...n, data: { ...n.data, ...updates } } : n
+            )
+          );
+        },
+      },
+    }));
+
+    setNodes(nodesWithHandlers);
+    setEdges(config.edges.map((e) => ({ ...e, animated: true })));
+    setIsImportModalOpen(false);
+  };
+
+  const handleExportJSON = () => {
+    const config = { nodes, edges };
+    const blob = new Blob([JSON.stringify(config, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${currentStack?.name || "workflow"}-config.json`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const handleZoomIn = () => {
@@ -166,6 +315,16 @@ const WorkflowBuilderContent = () => {
           </div>
         </div>
         <div className="header-right">
+          <Tooltip content="Import predefined configurations">
+            <button className="btn-icon" onClick={() => setIsImportModalOpen(true)}>
+              📥 Import
+            </button>
+          </Tooltip>
+          <Tooltip content="Export current workflow as JSON">
+            <button className="btn-icon" onClick={handleExportJSON}>
+              📤 Export
+            </button>
+          </Tooltip>
           <button className="btn-save" onClick={handleSave}>
             💾 Save
           </button>
@@ -174,7 +333,7 @@ const WorkflowBuilderContent = () => {
       </header>
 
       <div className="workflow-content">
-        {/* Sidebar with Tabs */}
+        {/* Sidebar */}
         <aside className="component-library">
           {/* Tab Headers */}
           <div className="sidebar-tabs">
@@ -187,8 +346,7 @@ const WorkflowBuilderContent = () => {
             </button>
           </div>
 
-          {/* Tab Content */}
-          {activeTab === "chat" ? (
+          {activeTab === "chat" && (
             <div className="sidebar-chat">
               <div className="chat-placeholder">
                 <div className="chat-placeholder-icon">💬</div>
@@ -198,30 +356,41 @@ const WorkflowBuilderContent = () => {
                 </button>
               </div>
             </div>
-          ) : null}
+          )}
 
-          {/* Components Section - Always visible below */}
+          {/* Components Section */}
           <div className="components-section">
             <h3 className="sidebar-title">Components</h3>
             <div className="component-list">
               {COMPONENTS.map((component) => (
-                <div
-                  key={component.type}
-                  className="component-item"
-                  draggable
-                  onDragStart={(event) => {
-                    event.dataTransfer.setData(
-                      "application/reactflow",
-                      component.type
-                    );
-                    event.dataTransfer.effectAllowed = "move";
-                  }}
-                >
-                  <span className="component-icon">{component.icon}</span>
-                  <span className="component-label">{component.label}</span>
-                </div>
+                <Tooltip key={component.type} content={component.tooltip} position="right">
+                  <div
+                    className="component-item"
+                    draggable
+                    onDragStart={(event) => {
+                      event.dataTransfer.setData("application/reactflow", component.type);
+                      event.dataTransfer.effectAllowed = "move";
+                    }}
+                  >
+                    <span className="component-icon">{component.icon}</span>
+                    <span className="component-label">{component.label}</span>
+                  </div>
+                </Tooltip>
               ))}
             </div>
+          </div>
+
+          {/* Grid Settings */}
+          <div className="sidebar-settings">
+            <h3 className="sidebar-title">Settings</h3>
+            <label className="setting-item">
+              <input
+                type="checkbox"
+                checked={snapToGridEnabled}
+                onChange={(e) => setSnapToGridEnabled(e.target.checked)}
+              />
+              <span>Snap to Grid</span>
+            </label>
           </div>
         </aside>
 
@@ -234,43 +403,62 @@ const WorkflowBuilderContent = () => {
             onConnect={onConnect}
             onDrop={onDrop}
             onDragOver={onDragOver}
+            onNodeDragStop={onNodeDragStop}
             onMoveEnd={onMoveEnd}
             nodeTypes={nodeTypes}
             fitView
+            snapToGrid={snapToGridEnabled}
+            snapGrid={[GRID_SIZE, GRID_SIZE]}
             className="react-flow-canvas"
             defaultEdgeOptions={{
               animated: true,
               style: { stroke: "#9CA3AF", strokeWidth: 2 },
             }}
           >
-            <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="#E5E7EB" />
+            <Background
+              variant={BackgroundVariant.Dots}
+              gap={GRID_SIZE}
+              size={1}
+              color="#E5E7EB"
+            />
+            <MiniMap
+              nodeColor={(node) => {
+                switch (node.type) {
+                  case "llm": return "#7C3AED";
+                  case "input": return "#F59E0B";
+                  case "output": return "#F59E0B";
+                  case "knowledge": return "#3B82F6";
+                  case "webSearch": return "#4CAF50";
+                  default: return "#9CA3AF";
+                }
+              }}
+              maskColor="rgba(0,0,0,0.1)"
+              style={{ background: "#F5F5F5" }}
+            />
           </ReactFlow>
 
           {nodes.length === 0 && (
             <div className="empty-canvas">
               <div className="empty-canvas-icon">🔀</div>
               <p>Drag & drop components to start building</p>
+              <button className="btn-import-template" onClick={() => setIsImportModalOpen(true)}>
+                Or import a template
+              </button>
             </div>
           )}
 
-          {/* Custom Zoom Controls - Bottom Center */}
+          {/* Zoom Controls */}
           <div className="zoom-controls">
-            <button className="zoom-btn" onClick={handleZoomIn} title="Zoom In">
-              +
-            </button>
-            <button className="zoom-btn" onClick={handleZoomOut} title="Zoom Out">
-              −
-            </button>
-            <button className="zoom-btn" onClick={handleFitView} title="Fit View">
-              ⛶
-            </button>
+            <button className="zoom-btn" onClick={handleZoomIn} title="Zoom In">+</button>
+            <button className="zoom-btn" onClick={handleZoomOut} title="Zoom Out">−</button>
+            <button className="zoom-btn" onClick={handleFitView} title="Fit View">⛶</button>
             <div className="zoom-level-dropdown">
               <span>{zoom}%</span>
               <span className="dropdown-arrow">▼</span>
             </div>
           </div>
 
-          {/* Floating Actions - Bottom Right */}
+          {/* Floating Actions */}
           <div className="floating-actions">
             <button className="fab fab-chat" onClick={toggleChat} title="Chat with Stack">
               💬
@@ -292,6 +480,15 @@ const WorkflowBuilderContent = () => {
           nodes={nodes}
           edges={edges}
           onClose={() => setIsSaveModalOpen(false)}
+        />
+      )}
+
+      {isImportModalOpen && (
+        <ImportConfigModal
+          templates={WORKFLOW_TEMPLATES}
+          onImportTemplate={handleImportTemplate}
+          onImportJSON={handleImportJSON}
+          onClose={() => setIsImportModalOpen(false)}
         />
       )}
     </div>
