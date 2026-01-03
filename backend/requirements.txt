@@ -1,22 +1,51 @@
+# FastAPI & Server
 fastapi==0.110.0
 uvicorn[standard]==0.29.0
+python-multipart==0.0.9
+
+# Database
 SQLAlchemy==2.0.25
 asyncpg==0.29.0
 alembic==1.13.1
+psycopg2-binary==2.9.9
+
+# Pydantic & Validation
 pydantic==2.5.0
 pydantic-settings==2.1.0
 email-validator==2.0.0.post2
+
+# Authentication & Security
 passlib[bcrypt]==1.7.4
 python-jose==3.3.0
-python-multipart==0.0.9
 PyJWT==2.8.0
+
+# Logging & Monitoring
 structlog==24.1.0
 loguru==0.7.2
+python-json-logger>=2.0.7
+prometheus-client>=0.19.0
+
+# SSE (Server-Sent Events) for real-time log streaming
+sse-starlette>=1.8.2
+
+# HTTP Client
 httpx==0.26.0
+
+# AI/LLM Services
 openai==1.6.1
 google-generativeai==0.3.2
+
+# Vector Store
 chromadb>=0.4.22
+
+# Document Processing
 pymupdf==1.23.8
+
+# Web Search
 serpapi==0.1.5
-psycopg2-binary==2.9.9
+
+# Utilities
 numpy<2.0.0
+
+# Optional: Redis for distributed features (uncomment if needed)
+# redis>=5.0.0

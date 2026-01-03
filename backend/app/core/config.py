@@ -38,8 +38,22 @@ class Settings(BaseSettings):
     # CORS
     backend_cors_origins: List[str] = ["*"]
     
-    # Logging
-    log_level: str = "info"
+    # ============== Logging Configuration ==============
+    log_level: str = "INFO"
+    log_format: str = "json"  # 'json' or 'text'
+    log_dir: str = "logs"
+    enable_file_logging: bool = True
+    enable_console_logging: bool = True
+    log_max_file_size: int = 10 * 1024 * 1024  # 10MB
+    log_backup_count: int = 5
+    
+    # ============== NEW: Metrics Configuration ==============
+    enable_metrics: bool = True
+    metrics_port: int = 9090
+    
+    # ============== NEW: Redis (for real-time log streaming) ==============
+    redis_url: str = "redis://localhost:6379"
+    enable_redis: bool = False  # Set to True when Redis is available
     
     @field_validator("openai_api_key", "gemini_api_key", "serpapi_api_key", mode="before")
     @classmethod
@@ -56,11 +70,22 @@ class Settings(BaseSettings):
         if isinstance(v, str):
             return [i.strip() for i in v.split(",")]
         return v
+    
+    @field_validator("log_level", mode="before")
+    @classmethod
+    def validate_log_level(cls, v):
+        """Validate and uppercase log level."""
+        valid_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+        if isinstance(v, str):
+            v = v.upper()
+            if v not in valid_levels:
+                return "INFO"
+        return v
 
     class Config:
         env_file = ".env"
         case_sensitive = False
-        extra = "ignore"  # Ignore extra env vars
+        extra = "ignore"
 
 
 # Singleton settings instance
