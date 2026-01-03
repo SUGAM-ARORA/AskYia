@@ -1,8 +1,177 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: logstash-config
+  namespace: workflow-builder
+data:
+  logstash.yml: |
+    http.host: "0.0.0.0"
+    path.config: /usr/share/logstash/pipeline
+    pipeline.workers: 2
+    pipeline.batch.size: 125
+    xpack.monitoring.enabled: true
+    xpack.monitoring.elasticsearch.hosts: ["http://elasticsearch:9200"]
+
+  pipelines.yml: |
+    - pipeline.id: main
+      path.config: "/usr/share/logstash/pipeline/*.conf"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: logstash-pipeline
+  namespace: workflow-builder
+data:
+  askyia.conf: |
+    input {
+      # Receive logs from Filebeat
+      beats {
+        port => 5044
+      }
+      
+      # Direct TCP input for application logs (JSON)
+      tcp {
+        port => 5000
+        codec => json_lines
+      }
+      
+      # HTTP input for webhook-style logging
+      http {
+        port => 8080
+        codec => json
+      }
+    }
+
+    filter {
+      # Parse JSON logs from application
+      if [message] =~ /^\{.*\}$/ {
+        json {
+          source => "message"
+          target => "parsed"
+          skip_on_invalid_json => true
+        }
+        
+        if [parsed] {
+          mutate {
+            rename => {
+              "[parsed][level]" => "level"
+              "[parsed][timestamp]" => "log_timestamp"
+              "[parsed][service]" => "service"
+              "[parsed][correlation_id]" => "correlation_id"
+              "[parsed][workflow_id]" => "workflow_id"
+              "[parsed][execution_id]" => "execution_id"
+              "[parsed][node_id]" => "node_id"
+              "[parsed][user_id]" => "user_id"
+              "[parsed][message]" => "log_message"
+            }
+            remove_field => ["parsed"]
+          }
+        }
+      }
+
+      # Add Kubernetes metadata if present
+      if [kubernetes] {
+        mutate {
+          add_field => {
+            "k8s_namespace" => "%{[kubernetes][namespace]}"
+            "k8s_pod" => "%{[kubernetes][pod][name]}"
+            "k8s_container" => "%{[kubernetes][container][name]}"
+          }
+        }
+      }
+
+      # Add application metadata
+      mutate {
+        add_field => {
+          "application" => "askyia"
+          "environment" => "${ENVIRONMENT:production}"
+        }
+      }
+
+      # Parse timestamp
+      if [log_timestamp] {
+        date {
+          match => ["log_timestamp", "ISO8601"]
+          target => "@timestamp"
+        }
+      }
+
+      # Categorize log levels
+      if [level] {
+        mutate {
+          uppercase => ["level"]
+        }
+        
+        if [level] == "ERROR" or [level] == "CRITICAL" {
+          mutate {
+            add_tag => ["error"]
+          }
+        }
+      }
+
+      # Workflow execution specific processing
+      if [workflow_id] and [execution_id] {
+        mutate {
+          add_tag => ["workflow_execution"]
+        }
+      }
+
+      # Extract duration metrics
+      if [duration_ms] {
+        ruby {
+          code => "
+            duration = event.get('duration_ms').to_f
+            event.set('duration_bucket', 
+              case duration
+              when 0..100 then 'fast'
+              when 100..500 then 'normal'
+              when 500..2000 then 'slow'
+              else 'very_slow'
+              end
+            )
+          "
+        }
+      }
+    }
+
+    output {
+      # Main index for all logs
+      elasticsearch {
+        hosts => ["http://elasticsearch:9200"]
+        index => "askyia-logs-%{+YYYY.MM.dd}"
+      }
+      
+      # Separate index for workflow executions
+      if "workflow_execution" in [tags] {
+        elasticsearch {
+          hosts => ["http://elasticsearch:9200"]
+          index => "askyia-workflows-%{+YYYY.MM.dd}"
+        }
+      }
+      
+      # Separate index for errors
+      if "error" in [tags] {
+        elasticsearch {
+          hosts => ["http://elasticsearch:9200"]
+          index => "askyia-errors-%{+YYYY.MM.dd}"
+        }
+      }
+      
+      # Debug output (comment out in production)
+      # stdout { codec => rubydebug }
+    }
+
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: logstash
   namespace: workflow-builder
+  labels:
+    app: logstash
+    app.kubernetes.io/name: logstash
+    app.kubernetes.io/part-of: askyia
 spec:
   replicas: 1
   selector:
@@ -18,15 +187,76 @@ spec:
           image: docker.elastic.co/logstash/logstash:8.11.1
           ports:
             - containerPort: 5044
+              name: beats
+            - containerPort: 5000
+              name: tcp
+            - containerPort: 8080
+              name: http
+            - containerPort: 9600
+              name: monitoring
+          env:
+            - name: ENVIRONMENT
+              value: "production"
+            - name: LS_JAVA_OPTS
+              value: "-Xms256m -Xmx256m"
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "200m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          volumeMounts:
+            - name: config
+              mountPath: /usr/share/logstash/config/logstash.yml
+              subPath: logstash.yml
+            - name: config
+              mountPath: /usr/share/logstash/config/pipelines.yml
+              subPath: pipelines.yml
+            - name: pipeline
+              mountPath: /usr/share/logstash/pipeline
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 9600
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 9600
+            initialDelaySeconds: 60
+            periodSeconds: 30
+      volumes:
+        - name: config
+          configMap:
+            name: logstash-config
+        - name: pipeline
+          configMap:
+            name: logstash-pipeline
+
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: logstash
   namespace: workflow-builder
+  labels:
+    app: logstash
 spec:
+  type: ClusterIP
   selector:
     app: logstash
   ports:
     - port: 5044
       targetPort: 5044
+      name: beats
+    - port: 5000
+      targetPort: 5000
+      name: tcp
+    - port: 8080
+      targetPort: 8080
+      name: http
+    - port: 9600
+      targetPort: 9600
+      name: monitoring

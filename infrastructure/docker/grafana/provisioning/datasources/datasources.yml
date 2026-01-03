@@ -1,0 +1,62 @@
+apiVersion: 1
+
+datasources:
+  # Prometheus - Default datasource for metrics
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: false
+    jsonData:
+      timeInterval: "15s"
+
+  # Elasticsearch - All logs
+  - name: Elasticsearch-Logs
+    type: elasticsearch
+    access: proxy
+    url: http://elasticsearch:9200
+    database: "askyia-logs-*"
+    jsonData:
+      timeField: "@timestamp"
+      esVersion: "8.0.0"
+      logMessageField: log_message
+      logLevelField: level
+    editable: false
+
+  # Elasticsearch - Workflow logs
+  - name: Elasticsearch-Workflows
+    type: elasticsearch
+    access: proxy
+    url: http://elasticsearch:9200
+    database: "askyia-workflows-*"
+    jsonData:
+      timeField: "@timestamp"
+      esVersion: "8.0.0"
+      logMessageField: log_message
+      logLevelField: level
+    editable: false
+
+  # Elasticsearch - Error logs
+  - name: Elasticsearch-Errors
+    type: elasticsearch
+    access: proxy
+    url: http://elasticsearch:9200
+    database: "askyia-errors-*"
+    jsonData:
+      timeField: "@timestamp"
+      esVersion: "8.0.0"
+      logMessageField: log_message
+      logLevelField: level
+    editable: false
+
+  # Elasticsearch - HTTP request logs
+  - name: Elasticsearch-HTTP
+    type: elasticsearch
+    access: proxy
+    url: http://elasticsearch:9200
+    database: "askyia-http-*"
+    jsonData:
+      timeField: "@timestamp"
+      esVersion: "8.0.0"
+    editable: false
