@@ -494,3 +494,63 @@
 .chat-messages::-webkit-scrollbar-thumb:hover {
   background: var(--scrollbar-thumb-hover);
 }
+
+/* Provider Badge in Header */
+.chat-provider-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 16px;
+  border: 1px solid;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.chat-provider-badge .provider-name {
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-primary);
+}
+
+/* Provider Info in Empty State */
+.chat-provider-info {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Message Meta (provider/model info) */
+.message-meta {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Improved Message Styling */
+.chat-message.assistant .message-content {
+  position: relative;
+}
+
+/* Error Message Improvements */
+.chat-message.error .message-content {
+  background: var(--color-error-light);
+  border-color: var(--color-error);
+  color: var(--color-error-dark);
+}
+
+[data-theme="dark"] .chat-message.error .message-content {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: #F87171;
+  color: #FCA5A5;
+}

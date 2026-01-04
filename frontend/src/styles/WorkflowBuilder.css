@@ -767,3 +767,29 @@
 .react-flow__minimap {
   background-color: var(--rf-minimap-bg) !important;
 }
+
+/* Executing state for FAB */
+.fab-run.executing {
+  background: var(--color-error);
+  animation: executingPulse 1s ease-in-out infinite;
+}
+
+@keyframes executingPulse {
+  0%, 100% { 
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+  }
+  50% { 
+    box-shadow: 0 4px 20px rgba(239, 68, 68, 0.6);
+  }
+}
+
+/* Active state for Logs button */
+.btn-icon.active {
+  background: var(--brand-primary-light);
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
+}
+
+[data-theme="dark"] .btn-icon.active {
+  background: rgba(16, 185, 129, 0.15);
+}

@@ -1,0 +1,204 @@
+/* ==============================================
+   API KEY MANAGER STYLES
+   ============================================== */
+
+.api-key-manager {
+  max-width: 600px;
+}
+
+.manager-description {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.provider-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.provider-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-normal);
+}
+
+.provider-row:hover {
+  border-color: var(--border-strong);
+}
+
+.provider-row.has-key {
+  border-color: var(--color-success);
+  background: var(--color-success-light);
+}
+
+[data-theme="dark"] .provider-row.has-key {
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.provider-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.provider-icon-large {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.provider-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.provider-name {
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  font-size: 15px;
+}
+
+.provider-docs {
+  font-size: 12px;
+  color: var(--text-link);
+}
+
+.provider-docs:hover {
+  color: var(--text-link-hover);
+  text-decoration: underline;
+}
+
+.provider-key-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.key-edit-form {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.key-edit-form .form-input-small {
+  width: 200px;
+}
+
+.key-display {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.key-masked {
+  font-family: var(--font-family-mono);
+  font-size: 13px;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  padding: 6px 10px;
+  border-radius: var(--radius-md);
+}
+
+.btn-icon-small {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all var(--transition-fast);
+}
+
+.btn-icon-small:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-strong);
+}
+
+.btn-icon-small.danger:hover {
+  background: var(--color-error-light);
+  border-color: var(--color-error);
+}
+
+.btn-save-small {
+  padding: 6px 12px;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.btn-save-small:hover {
+  background: var(--btn-primary-hover);
+}
+
+.btn-cancel-small {
+  padding: 6px 12px;
+  background: var(--btn-secondary-bg);
+  color: var(--btn-secondary-text);
+  border: 1px solid var(--btn-secondary-border);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-cancel-small:hover {
+  background: var(--btn-secondary-hover);
+}
+
+.btn-add-key {
+  padding: 8px 16px;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1px dashed var(--border-default);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-add-key:hover {
+  background: var(--bg-hover);
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
+}
+
+.manager-footer-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 20px;
+  padding: 12px 16px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-lg);
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.note-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}

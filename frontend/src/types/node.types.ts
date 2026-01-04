@@ -1,3 +1,5 @@
+import { LLMProvider } from "./llm.types";
+
 export type NodeKind = "user_query" | "knowledge_base" | "llm_engine" | "output" | "input" | "llm" | "knowledge" | "webSearch";
 
 export interface NodeData {
@@ -11,25 +13,32 @@ export interface InputNodeData extends NodeData {
 }
 
 export interface LLMNodeData extends NodeData {
-  provider?: string;  // Added: "gemini" | "openai"
+  provider?: LLMProvider;
   model?: string;
   apiKey?: string;
   prompt?: string;
+  systemPrompt?: string;
   temperature?: number;
-  maxTokens?: number;  // Added
+  maxTokens?: number;
+  topP?: number;
+  frequencyPenalty?: number;
+  presencePenalty?: number;
   webSearch?: boolean;
   serpApiKey?: string;
+  useGlobalApiKey?: boolean;
 }
 
 export interface KnowledgeBaseNodeData extends NodeData {
   file?: File | string | null;
   embeddingModel?: string;
+  embeddingProvider?: LLMProvider;
   apiKey?: string;
 }
 
 export interface WebSearchNodeData extends NodeData {
   apiKey?: string;
   maxResults?: number;
+  searchEngine?: string;
 }
 
 export interface OutputNodeData extends NodeData {

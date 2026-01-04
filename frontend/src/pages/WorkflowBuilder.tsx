@@ -8,6 +8,7 @@ import ReactFlow, {
   useEdgesState,
   Node,
   NodeTypes,
+  EdgeTypes,
   useReactFlow,
   ReactFlowProvider,
   MiniMap,
@@ -16,6 +17,7 @@ import "reactflow/dist/style.css";
 import { v4 as uuidv4 } from "uuid";
 import { useStackStore } from "../store/stackSlice";
 import { useWorkflowStore } from "../store/workflowSlice";
+import { useExecutionStore } from "../store/executionSlice";
 import InputNode from "../components/nodes/InputNode";
 import LLMNode from "../components/nodes/LLMNode";
 import KnowledgeBaseNode from "../components/nodes/KnowledgeBaseNode";
@@ -25,6 +27,8 @@ import ConditionalNode from "../components/nodes/ConditionalNode";
 import APINode from "../components/nodes/APINode";
 import MemoryNode from "../components/nodes/MemoryNode";
 import ValidatorNode from "../components/nodes/ValidatorNode";
+import TransformNode from "../components/nodes/TransformNode";
+import AnimatedEdge from "../components/edges/AnimatedEdge";
 import ChatModal from "../components/chat/ChatModal";
 import ThemeToggle from "../components/common/ThemeToggle";
 import UserMenu from "../components/common/UserMenu";
@@ -32,8 +36,11 @@ import Logo from "../components/common/Logo";
 import SaveWorkflowModal from "../components/common/SaveWorkflowModal";
 import ImportConfigModal from "../components/common/ImportConfigModal";
 import Tooltip from "../components/common/Tooltip";
+import ApiKeyManager from "../components/common/ApiKeyManager";
+import ExecutionPanel from "../components/execution/ExecutionPanel";
+import { useWorkflowExecution } from "../hooks/useWorkflowExecution";
 import "../styles/WorkflowBuilder.css";
-import TransformNode from "../components/nodes/TransformNode";
+import "../styles/Execution.css";
 
 const nodeTypes: NodeTypes = {
   input: InputNode,
@@ -48,9 +55,13 @@ const nodeTypes: NodeTypes = {
   validator: ValidatorNode,
 };
 
+const edgeTypes: EdgeTypes = {
+  default: AnimatedEdge,
+};
+
 const COMPONENTS = [
   { type: "input", icon: "📥", label: "User Query", category: "input", tooltip: "Entry point for user queries" },
-  { type: "llm", icon: "✨", label: "LLM (OpenAI)", category: "ai", tooltip: "Process queries with LLM models" },
+  { type: "llm", icon: "✨", label: "LLM", category: "ai", tooltip: "Process queries with AI models (OpenAI, Gemini, Claude, etc.)" },
   { type: "knowledge", icon: "📚", label: "Knowledge Base", category: "data", tooltip: "Search information in uploaded documents" },
   { type: "webSearch", icon: "🌐", label: "Web Search", category: "data", tooltip: "Search the web for information" },
   { type: "output", icon: "📤", label: "Output", category: "output", tooltip: "Display final results" },
@@ -68,7 +79,7 @@ const WORKFLOW_TEMPLATES = [
     description: "Basic user query to LLM flow",
     nodes: [
       { id: "1", type: "input", position: { x: 100, y: 200 }, data: { label: "input" } },
-      { id: "2", type: "llm", position: { x: 400, y: 200 }, data: { label: "llm" } },
+      { id: "2", type: "llm", position: { x: 400, y: 200 }, data: { label: "llm", provider: "openai", model: "gpt-4o-mini" } },
       { id: "3", type: "output", position: { x: 700, y: 200 }, data: { label: "output" } },
     ],
     edges: [
@@ -82,7 +93,7 @@ const WORKFLOW_TEMPLATES = [
     nodes: [
       { id: "1", type: "input", position: { x: 100, y: 150 }, data: { label: "input" } },
       { id: "2", type: "knowledge", position: { x: 100, y: 350 }, data: { label: "knowledge" } },
-      { id: "3", type: "llm", position: { x: 450, y: 250 }, data: { label: "llm" } },
+      { id: "3", type: "llm", position: { x: 450, y: 250 }, data: { label: "llm", provider: "openai", model: "gpt-4o-mini" } },
       { id: "4", type: "output", position: { x: 750, y: 250 }, data: { label: "output" } },
     ],
     edges: [
@@ -98,7 +109,7 @@ const WORKFLOW_TEMPLATES = [
     nodes: [
       { id: "1", type: "input", position: { x: 100, y: 200 }, data: { label: "input" } },
       { id: "2", type: "webSearch", position: { x: 350, y: 200 }, data: { label: "webSearch" } },
-      { id: "3", type: "llm", position: { x: 600, y: 200 }, data: { label: "llm" } },
+      { id: "3", type: "llm", position: { x: 600, y: 200 }, data: { label: "llm", provider: "google", model: "gemini-1.5-flash" } },
       { id: "4", type: "output", position: { x: 850, y: 200 }, data: { label: "output" } },
     ],
     edges: [
@@ -106,6 +117,45 @@ const WORKFLOW_TEMPLATES = [
       { id: "e2-3", source: "2", target: "3", sourceHandle: "results", targetHandle: "context" },
       { id: "e1-3", source: "1", target: "3", sourceHandle: "query", targetHandle: "query" },
       { id: "e3-4", source: "3", target: "4", sourceHandle: "output", targetHandle: "output" },
+    ],
+  },
+  {
+    name: "Claude Assistant",
+    description: "Chat using Anthropic Claude models",
+    nodes: [
+      { id: "1", type: "input", position: { x: 100, y: 200 }, data: { label: "input" } },
+      { id: "2", type: "llm", position: { x: 400, y: 200 }, data: { label: "llm", provider: "anthropic", model: "claude-3-5-sonnet-20241022" } },
+      { id: "3", type: "output", position: { x: 700, y: 200 }, data: { label: "output" } },
+    ],
+    edges: [
+      { id: "e1-2", source: "1", target: "2", sourceHandle: "query", targetHandle: "query" },
+      { id: "e2-3", source: "2", target: "3", sourceHandle: "output", targetHandle: "output" },
+    ],
+  },
+  {
+    name: "Gemini Chat",
+    description: "Chat using Google Gemini models",
+    nodes: [
+      { id: "1", type: "input", position: { x: 100, y: 200 }, data: { label: "input" } },
+      { id: "2", type: "llm", position: { x: 400, y: 200 }, data: { label: "llm", provider: "google", model: "gemini-2.0-flash-exp" } },
+      { id: "3", type: "output", position: { x: 700, y: 200 }, data: { label: "output" } },
+    ],
+    edges: [
+      { id: "e1-2", source: "1", target: "2", sourceHandle: "query", targetHandle: "query" },
+      { id: "e2-3", source: "2", target: "3", sourceHandle: "output", targetHandle: "output" },
+    ],
+  },
+  {
+    name: "Groq Fast Inference",
+    description: "Ultra-fast chat using Groq's LPU",
+    nodes: [
+      { id: "1", type: "input", position: { x: 100, y: 200 }, data: { label: "input" } },
+      { id: "2", type: "llm", position: { x: 400, y: 200 }, data: { label: "llm", provider: "groq", model: "llama-3.3-70b-versatile" } },
+      { id: "3", type: "output", position: { x: 700, y: 200 }, data: { label: "output" } },
+    ],
+    edges: [
+      { id: "e1-2", source: "1", target: "2", sourceHandle: "query", targetHandle: "query" },
+      { id: "e2-3", source: "2", target: "3", sourceHandle: "output", targetHandle: "output" },
     ],
   },
 ];
@@ -121,8 +171,10 @@ const snapToGrid = (position: { x: number; y: number }) => ({
 const WorkflowBuilderContent = () => {
   const { currentStack } = useStackStore();
   const { isChatOpen, toggleChat } = useWorkflowStore();
+  const { showExecutionPanel, setShowExecutionPanel, isExecuting, resetExecution } = useExecutionStore();
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [isApiKeyManagerOpen, setIsApiKeyManagerOpen] = useState(false);
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [zoom, setZoom] = useState(100);
@@ -130,6 +182,9 @@ const WorkflowBuilderContent = () => {
   const [snapToGridEnabled, setSnapToGridEnabled] = useState(true);
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const { zoomIn, zoomOut, fitView, getZoom } = useReactFlow();
+
+  // Workflow execution hook
+  const { execute, cancel } = useWorkflowExecution();
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge({ ...params, animated: true }, eds)),
@@ -204,8 +259,39 @@ const WorkflowBuilderContent = () => {
   };
 
   const handleBuildStack = () => {
-    console.log("Building stack:", { nodes, edges });
-    alert("Building stack... Check console for workflow definition.");
+    if (nodes.length === 0) {
+      alert("Please add some nodes to the workflow first.");
+      return;
+    }
+
+    if (isExecuting) {
+      // Cancel current execution
+      cancel();
+      return;
+    }
+
+    // Reset any previous execution state
+    resetExecution();
+
+    // Get query from input node
+    const inputNode = nodes.find((n) => n.type === "input");
+    const query = inputNode?.data?.query || "Hello, how can you help me?";
+
+    // Start execution
+    execute(nodes, edges, query, {
+      onComplete: (result) => {
+        console.log("Workflow completed:", result);
+      },
+      onError: (error) => {
+        console.error("Workflow error:", error);
+      },
+      onNodeStart: (nodeId) => {
+        console.log("Node started:", nodeId);
+      },
+      onNodeComplete: (nodeId, output) => {
+        console.log("Node completed:", nodeId, output);
+      },
+    });
   };
 
   const handleImportTemplate = (template: typeof WORKFLOW_TEMPLATES[0]) => {
@@ -326,6 +412,19 @@ const WorkflowBuilderContent = () => {
               📤 Export
             </button>
           </Tooltip>
+          <Tooltip content="Manage API Keys for all providers">
+            <button className="btn-icon" onClick={() => setIsApiKeyManagerOpen(true)}>
+              🔑 Keys
+            </button>
+          </Tooltip>
+          <Tooltip content="View execution logs and progress">
+            <button 
+              className={`btn-icon ${showExecutionPanel ? 'active' : ''}`} 
+              onClick={() => setShowExecutionPanel(!showExecutionPanel)}
+            >
+              ⚡ Logs
+            </button>
+          </Tooltip>
           <button className="btn-save" onClick={handleSave}>
             💾 Save
           </button>
@@ -408,12 +507,14 @@ const WorkflowBuilderContent = () => {
             onNodeDragStop={onNodeDragStop}
             onMoveEnd={onMoveEnd}
             nodeTypes={nodeTypes}
+            edgeTypes={edgeTypes}
             fitView
             snapToGrid={snapToGridEnabled}
             snapGrid={[GRID_SIZE, GRID_SIZE]}
             className="react-flow-canvas"
             defaultEdgeOptions={{
-              animated: true,
+              type: 'default',
+              animated: false,
               style: { stroke: "#9CA3AF", strokeWidth: 2 },
             }}
           >
@@ -466,17 +567,29 @@ const WorkflowBuilderContent = () => {
               💬
             </button>
             <div className="build-stack-container">
-              <span className="build-stack-label">Build Stack</span>
-              <button className="fab fab-run" onClick={handleBuildStack} title="Build Stack">
-                ▶
+              <span className="build-stack-label">
+                {isExecuting ? "Running..." : "Build Stack"}
+              </span>
+              <button 
+                className={`fab fab-run ${isExecuting ? 'executing' : ''}`} 
+                onClick={handleBuildStack} 
+                title={isExecuting ? "Cancel Execution" : "Build Stack"}
+              >
+                {isExecuting ? "⏹" : "▶"}
               </button>
             </div>
           </div>
+
+          {/* Execution Panel */}
+          {showExecutionPanel && (
+            <ExecutionPanel onClose={() => setShowExecutionPanel(false)} />
+          )}
         </div>
       </div>
 
+      {/* Modals */}
       {isChatOpen && <ChatModal />}
-      
+
       {isSaveModalOpen && (
         <SaveWorkflowModal
           nodes={nodes}
@@ -492,6 +605,10 @@ const WorkflowBuilderContent = () => {
           onImportJSON={handleImportJSON}
           onClose={() => setIsImportModalOpen(false)}
         />
+      )}
+
+      {isApiKeyManagerOpen && (
+        <ApiKeyManager onClose={() => setIsApiKeyManagerOpen(false)} />
       )}
     </div>
   );
