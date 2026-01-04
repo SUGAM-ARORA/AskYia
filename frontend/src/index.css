@@ -1,3 +1,8 @@
+/* Import design system */
+@import './styles/design-tokens.css';
+@import './styles/themes/light.css';
+@import './styles/themes/dark.css';
+
 * { 
   box-sizing: border-box;
   margin: 0;
@@ -6,16 +11,21 @@
 
 body {
   margin: 0;
-  font-family: "Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
-  background: #F5F5F5;
-  color: #1F2937;
-  font-size: 14px;
-  line-height: 1.5;
+  font-family: var(--font-family-base);
+  background: var(--bg-canvas);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  transition: background-color var(--transition-normal), color var(--transition-normal);
 }
 
 a {
-  color: inherit;
+  color: var(--text-link);
   text-decoration: none;
+}
+
+a:hover {
+  color: var(--text-link-hover);
 }
 
 button {
@@ -28,19 +38,48 @@ button {
 input, textarea, select {
   font: inherit;
   outline: none;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  color: var(--input-text);
+  border-radius: var(--radius-md);
 }
 
-:root {
-  --primary-green: #4CAF50;
-  --light-green: #E8F5E9;
-  --purple: #7C3AED;
-  --purple-light: #F3E5F5;
-  --blue: #3B82F6;
-  --orange: #F59E0B;
-  --bg-gray: #F5F5F5;
-  --card-white: #FFFFFF;
-  --text-primary: #1F2937;
-  --text-secondary: #6B7280;
-  --border: #E5E7EB;
-  --danger: #EF4444;
+input::placeholder, textarea::placeholder {
+  color: var(--input-placeholder);
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: var(--input-focus-border);
+  box-shadow: 0 0 0 3px var(--input-focus-ring);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+  border-radius: var(--radius-sm);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: var(--radius-sm);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* Selection color */
+::selection {
+  background: var(--brand-primary-light);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] ::selection {
+  background: var(--brand-primary-dark);
+  color: #FFFFFF;
 }

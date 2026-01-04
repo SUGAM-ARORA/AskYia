@@ -19,33 +19,38 @@
 .login-form .form-input {
   width: 100%;
   padding: 12px 14px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--input-border);
   border-radius: 8px;
   font-size: 14px;
-  background: white;
-  color: var(--text-primary);
-  transition: border-color 0.2s, box-shadow 0.2s;
+  background: var(--input-bg);
+  color: var(--input-text);
+  transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.login-form .form-input::placeholder {
+  color: var(--input-placeholder);
 }
 
 .login-form .form-input:focus {
-  border-color: var(--primary-green);
-  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+  border-color: var(--input-focus-border);
+  box-shadow: 0 0 0 3px var(--input-focus-ring);
 }
 
 .btn-login {
   width: 100%;
   padding: 12px;
-  background: var(--primary-green);
-  color: white;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
   border-radius: 8px;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 15px;
-  transition: background 0.2s;
+  transition: background var(--transition-normal);
   margin-top: 8px;
+  border: none;
 }
 
 .btn-login:hover:not(:disabled) {
-  background: #45a049;
+  background: var(--btn-primary-hover);
 }
 
 .btn-login:disabled {

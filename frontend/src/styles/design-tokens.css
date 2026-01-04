@@ -1,0 +1,101 @@
+/* ==============================================
+   ASKYIA DESIGN TOKENS
+   Core design system variables with backwards compatibility
+   ============================================== */
+
+:root {
+  /* ========== BRAND COLORS ========== */
+  --brand-primary: #10B981;
+  --brand-primary-hover: #059669;
+  --brand-primary-light: #D1FAE5;
+  --brand-primary-dark: #047857;
+  
+  --brand-secondary: #8B5CF6;
+  --brand-secondary-hover: #7C3AED;
+  --brand-secondary-light: #EDE9FE;
+  
+  --brand-accent: #F59E0B;
+  --brand-accent-light: #FEF3C7;
+  
+  /* ========== LEGACY VARIABLE MAPPING ========== */
+  /* These map old variable names to new ones for backwards compatibility */
+  --primary-green: var(--brand-primary);
+  --light-green: var(--brand-primary-light);
+  --purple: var(--brand-secondary);
+  --purple-light: var(--brand-secondary-light);
+  --blue: #3B82F6;
+  --orange: #F59E0B;
+  --danger: #EF4444;
+  
+  /* ========== SEMANTIC COLORS ========== */
+  --color-success: #10B981;
+  --color-success-light: #D1FAE5;
+  --color-success-dark: #047857;
+  
+  --color-warning: #F59E0B;
+  --color-warning-light: #FEF3C7;
+  --color-warning-dark: #B45309;
+  
+  --color-error: #EF4444;
+  --color-error-light: #FEE2E2;
+  --color-error-dark: #DC2626;
+  
+  --color-info: #3B82F6;
+  --color-info-light: #DBEAFE;
+  --color-info-dark: #2563EB;
+
+  /* ========== TYPOGRAPHY ========== */
+  --font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+  
+  /* ========== SPACING ========== */
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-5: 1.25rem;
+  --spacing-6: 1.5rem;
+  --spacing-8: 2rem;
+  --spacing-10: 2.5rem;
+  --spacing-12: 3rem;
+  
+  /* ========== BORDER RADIUS ========== */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-full: 9999px;
+  
+  /* ========== TRANSITIONS ========== */
+  --transition-fast: 150ms ease;
+  --transition-normal: 200ms ease;
+  --transition-slow: 300ms ease;
+  
+  /* ========== Z-INDEX ========== */
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-modal-backdrop: 400;
+  --z-modal: 500;
+  --z-popover: 600;
+  --z-tooltip: 700;
+  --z-toast: 800;
+}

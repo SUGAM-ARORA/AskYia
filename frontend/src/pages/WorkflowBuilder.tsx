@@ -26,6 +26,7 @@ import APINode from "../components/nodes/APINode";
 import MemoryNode from "../components/nodes/MemoryNode";
 import ValidatorNode from "../components/nodes/ValidatorNode";
 import ChatModal from "../components/chat/ChatModal";
+import ThemeToggle from "../components/common/ThemeToggle";
 import UserMenu from "../components/common/UserMenu";
 import Logo from "../components/common/Logo";
 import SaveWorkflowModal from "../components/common/SaveWorkflowModal";
@@ -328,6 +329,7 @@ const WorkflowBuilderContent = () => {
           <button className="btn-save" onClick={handleSave}>
             💾 Save
           </button>
+          <ThemeToggle />
           <UserMenu />
         </div>
       </header>

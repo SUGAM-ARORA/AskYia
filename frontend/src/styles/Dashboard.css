@@ -1,15 +1,16 @@
 .dashboard {
   min-height: 100vh;
-  background: var(--bg-gray);
+  background: var(--bg-canvas);
+  transition: background-color var(--transition-normal);
 }
 
 .dashboard-header {
-  background: var(--card-white);
+  background: var(--surface-card);
   padding: 16px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-default);
 }
 
 .header-left {
@@ -32,11 +33,7 @@
   font-weight: 600;
 }
 
-.logo-icon {
-  font-size: 20px;
-}
-
-/* User Menu - shared with WorkflowBuilder */
+/* User Menu */
 .user-menu {
   position: relative;
 }
@@ -45,7 +42,7 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: var(--primary-green);
+  background: var(--brand-primary);
   color: white;
   font-weight: 600;
   font-size: 16px;
@@ -53,25 +50,25 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-normal);
   border: 2px solid transparent;
 }
 
 .user-button:hover {
-  border-color: var(--primary-green);
-  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px var(--input-focus-ring);
 }
 
 .user-dropdown {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  background: var(--card-white);
-  border: 1px solid var(--border);
+  background: var(--surface-card);
+  border: 1px solid var(--border-default);
   border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-xl);
   min-width: 200px;
-  z-index: 100;
+  z-index: var(--z-dropdown);
   animation: dropdownSlide 0.2s ease;
 }
 
@@ -88,7 +85,7 @@
 
 .user-dropdown-header {
   padding: 16px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-default);
 }
 
 .user-dropdown-email {
@@ -112,7 +109,7 @@
   font-size: 14px;
   color: var(--text-primary);
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background var(--transition-normal);
   width: 100%;
   text-align: left;
   background: none;
@@ -120,15 +117,15 @@
 }
 
 .user-dropdown-item:hover {
-  background: var(--bg-gray);
+  background: var(--bg-hover);
 }
 
 .user-dropdown-item.danger {
-  color: var(--danger);
+  color: var(--color-error);
 }
 
 .user-dropdown-item.danger:hover {
-  background: #FEF2F2;
+  background: var(--color-error-light);
 }
 
 .dashboard-main {
@@ -150,26 +147,27 @@
   color: var(--text-primary);
 }
 
-/* Horizontal divider below My Stacks */
 .dashboard-divider {
   height: 1px;
-  background: var(--border);
+  background: var(--border-default);
   margin-bottom: 24px;
 }
 
 .btn-new-stack {
-  background: linear-gradient(135deg, var(--primary-green) 0%, #45a049 100%);
-  color: white;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
   padding: 10px 20px;
   border-radius: 8px;
   font-weight: 600;
-  transition: all 0.2s;
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+  transition: all var(--transition-normal);
+  box-shadow: var(--shadow-md);
+  border: none;
 }
 
 .btn-new-stack:hover {
+  background: var(--btn-primary-hover);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+  box-shadow: var(--shadow-lg);
 }
 
 .empty-state {
@@ -180,8 +178,8 @@
 }
 
 .empty-card {
-  background: var(--card-white);
-  border: 2px dashed var(--border);
+  background: var(--surface-card);
+  border: 2px dashed var(--border-default);
   border-radius: 12px;
   padding: 48px 64px;
   text-align: center;
@@ -202,19 +200,21 @@
 }
 
 .btn-new-stack-large {
-  background: linear-gradient(135deg, var(--primary-green) 0%, #45a049 100%);
-  color: white;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
   padding: 14px 28px;
   border-radius: 8px;
   font-weight: 600;
   font-size: 15px;
-  transition: all 0.2s;
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+  transition: all var(--transition-normal);
+  box-shadow: var(--shadow-md);
+  border: none;
 }
 
 .btn-new-stack-large:hover {
+  background: var(--btn-primary-hover);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+  box-shadow: var(--shadow-lg);
 }
 
 .stack-grid {
@@ -224,18 +224,18 @@
 }
 
 .stack-card {
-  background: var(--card-white);
-  border: 1px solid var(--border);
+  background: var(--surface-card);
+  border: 1px solid var(--border-default);
   border-radius: 12px;
   padding: 24px;
-  transition: all 0.2s;
+  transition: all var(--transition-normal);
   position: relative;
 }
 
 .stack-card:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-lg);
   transform: translateY(-4px);
-  border-color: var(--primary-green);
+  border-color: var(--brand-primary);
 }
 
 .stack-card-header {
@@ -263,23 +263,24 @@
   font-size: 18px;
   cursor: pointer;
   opacity: 0.5;
-  transition: opacity 0.2s;
+  transition: opacity var(--transition-normal);
   border-radius: 4px;
+  color: var(--text-primary);
 }
 
 .stack-card-menu-btn:hover {
   opacity: 1;
-  background: var(--bg-gray);
+  background: var(--bg-hover);
 }
 
 .stack-card-dropdown {
   position: absolute;
   top: 100%;
   right: 0;
-  background: var(--card-white);
-  border: 1px solid var(--border);
+  background: var(--surface-card);
+  border: 1px solid var(--border-default);
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-lg);
   min-width: 140px;
   z-index: 50;
 }
@@ -291,7 +292,7 @@
   padding: 10px 14px;
   font-size: 13px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background var(--transition-normal);
   width: 100%;
   text-align: left;
   background: none;
@@ -300,15 +301,15 @@
 }
 
 .stack-card-dropdown-item:hover {
-  background: var(--bg-gray);
+  background: var(--bg-hover);
 }
 
 .stack-card-dropdown-item.danger {
-  color: var(--danger);
+  color: var(--color-error);
 }
 
 .stack-card-dropdown-item.danger:hover {
-  background: #FEF2F2;
+  background: var(--color-error-light);
 }
 
 .stack-card-description {
@@ -330,28 +331,29 @@
   border-radius: 6px;
   font-weight: 500;
   font-size: 13px;
-  transition: all 0.2s;
+  transition: all var(--transition-normal);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
+  border: none;
 }
 
 .stack-card-action.primary {
-  background: var(--primary-green);
-  color: white;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
 }
 
 .stack-card-action.primary:hover {
-  background: #45a049;
+  background: var(--btn-primary-hover);
 }
 
 .stack-card-action.secondary {
-  background: var(--bg-gray);
-  color: var(--text-primary);
-  border: 1px solid var(--border);
+  background: var(--btn-secondary-bg);
+  color: var(--btn-secondary-text);
+  border: 1px solid var(--btn-secondary-border);
 }
 
 .stack-card-action.secondary:hover {
-  background: var(--border);
+  background: var(--btn-secondary-hover);
 }

@@ -3,16 +3,26 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
+  background: var(--bg-canvas);
+  transition: background-color var(--transition-normal);
+}
+
+[data-theme="light"] .login-container {
   background: linear-gradient(135deg, #E8F5E9 0%, #E3F2FD 100%);
 }
 
+[data-theme="dark"] .login-container {
+  background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+}
+
 .login-card {
-  background: var(--card-white);
+  background: var(--surface-card);
   padding: 40px;
   border-radius: 16px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-xl);
   width: 90%;
   max-width: 420px;
+  border: 1px solid var(--border-default);
 }
 
 .login-header {

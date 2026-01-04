@@ -472,3 +472,242 @@
   color: #DC2626;
   font-size: 13px;
 }
+
+.modal-overlay {
+  background: var(--surface-overlay);
+}
+
+.modal-content {
+  background: var(--surface-card);
+  border: 1px solid var(--border-default);
+}
+
+.modal-header {
+  border-bottom-color: var(--border-default);
+}
+
+.modal-title {
+  color: var(--text-primary);
+}
+
+.modal-close {
+  color: var(--text-secondary);
+}
+
+.modal-close:hover {
+  background: var(--bg-hover);
+}
+
+/* Form Elements */
+.form-label {
+  color: var(--text-primary);
+}
+
+.form-input,
+.form-textarea {
+  background: var(--input-bg);
+  border-color: var(--input-border);
+  color: var(--input-text);
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  border-color: var(--input-focus-border);
+  box-shadow: 0 0 0 3px var(--input-focus-ring);
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: var(--input-placeholder);
+}
+
+/* Modal Footer */
+.modal-footer {
+  border-top-color: var(--border-default);
+}
+
+.btn-primary {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--btn-primary-hover);
+}
+
+.btn-secondary {
+  background: var(--btn-secondary-bg);
+  color: var(--btn-secondary-text);
+  border-color: var(--btn-secondary-border);
+}
+
+.btn-secondary:hover {
+  background: var(--btn-secondary-hover);
+}
+
+/* Save Workflow Specific */
+.save-workflow-info {
+  background: var(--bg-tertiary);
+}
+
+.info-label {
+  color: var(--text-secondary);
+}
+
+.info-value {
+  color: var(--text-primary);
+}
+
+.save-mode-option {
+  background: var(--bg-tertiary);
+}
+
+.save-mode-option:hover:not(.disabled) {
+  background: var(--brand-primary-light);
+  border-color: var(--brand-primary);
+}
+
+[data-theme="dark"] .save-mode-option:hover:not(.disabled) {
+  background: rgba(16, 185, 129, 0.15);
+}
+
+.form-hint {
+  color: var(--text-tertiary);
+}
+
+.form-error {
+  background: var(--color-error-light);
+  border-color: var(--color-error);
+  color: var(--color-error-dark);
+}
+
+[data-theme="dark"] .form-error {
+  background: #450A0A;
+  border-color: #F87171;
+  color: #FCA5A5;
+}
+
+.no-workflows {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.workflow-list-item {
+  background: var(--bg-tertiary);
+}
+
+.workflow-list-item:hover {
+  background: var(--bg-hover);
+}
+
+.workflow-list-item.selected {
+  background: var(--brand-primary-light);
+  border-color: var(--brand-primary);
+}
+
+[data-theme="dark"] .workflow-list-item.selected {
+  background: rgba(16, 185, 129, 0.15);
+}
+
+.workflow-item-name {
+  color: var(--text-primary);
+}
+
+.workflow-item-meta {
+  color: var(--text-secondary);
+}
+
+.workflow-stats {
+  background: var(--bg-tertiary);
+}
+
+.stat-value {
+  color: var(--brand-primary);
+}
+
+.stat-label {
+  color: var(--text-secondary);
+}
+
+/* Import Config */
+.import-tabs {
+  border-bottom-color: var(--border-default);
+}
+
+.import-tab {
+  color: var(--text-secondary);
+}
+
+.import-tab:hover {
+  color: var(--text-primary);
+}
+
+.import-tab.active {
+  color: var(--brand-primary);
+  border-bottom-color: var(--brand-primary);
+}
+
+/* Template Cards */
+.template-card {
+  background: var(--bg-tertiary);
+  border-color: var(--border-default);
+}
+
+.template-card:hover {
+  border-color: var(--brand-primary);
+}
+
+.template-name {
+  color: var(--text-primary);
+}
+
+.template-description {
+  color: var(--text-secondary);
+}
+
+.template-meta {
+  color: var(--text-tertiary);
+}
+
+.btn-use-template {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+}
+
+.btn-use-template:hover {
+  background: var(--btn-primary-hover);
+}
+
+/* JSON Import */
+.file-drop-zone {
+  border-color: var(--border-default);
+  background: var(--bg-tertiary);
+}
+
+.file-drop-zone:hover {
+  border-color: var(--brand-primary);
+  background: var(--brand-primary-light);
+}
+
+[data-theme="dark"] .file-drop-zone:hover {
+  background: rgba(16, 185, 129, 0.15);
+}
+
+.file-drop-zone p {
+  color: var(--text-primary);
+}
+
+.file-types {
+  color: var(--text-tertiary);
+}
+
+.json-error {
+  background: var(--color-error-light);
+  border-color: var(--color-error);
+  color: var(--color-error-dark);
+}
+
+[data-theme="dark"] .json-error {
+  background: #450A0A;
+  color: #FCA5A5;
+}

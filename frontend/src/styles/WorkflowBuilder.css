@@ -567,3 +567,203 @@
   background: var(--light-green);
   border-color: var(--primary-green);
 }
+
+.workflow-builder {
+  background: var(--bg-canvas);
+}
+
+.workflow-header {
+  background: var(--surface-card);
+  border-bottom-color: var(--border-default);
+}
+
+/* Sidebar */
+.component-library {
+  background: var(--surface-card);
+  border-right-color: var(--border-default);
+}
+
+.sidebar-tabs {
+  border-bottom-color: var(--border-default);
+}
+
+.sidebar-tab {
+  background: var(--bg-tertiary);
+  border-color: var(--border-default);
+  color: var(--text-primary);
+}
+
+.sidebar-tab:hover {
+  background: var(--brand-primary-light);
+  border-color: var(--brand-primary);
+}
+
+.sidebar-tab.active {
+  background: var(--brand-primary-light);
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
+}
+
+[data-theme="dark"] .sidebar-tab:hover,
+[data-theme="dark"] .sidebar-tab.active {
+  background: rgba(16, 185, 129, 0.15);
+}
+
+/* Sidebar Titles */
+.sidebar-title {
+  color: var(--text-secondary);
+}
+
+/* Chat Placeholder */
+.sidebar-chat {
+  border-bottom-color: var(--border-default);
+}
+
+.chat-placeholder {
+  background: var(--bg-tertiary);
+}
+
+.chat-placeholder p {
+  color: var(--text-secondary);
+}
+
+/* Component List */
+.component-item {
+  background: var(--bg-tertiary);
+  border-color: var(--border-default);
+}
+
+.component-item:hover {
+  border-color: var(--brand-primary);
+  background: var(--brand-primary-light);
+}
+
+[data-theme="dark"] .component-item:hover {
+  background: rgba(16, 185, 129, 0.15);
+}
+
+.component-label {
+  color: var(--text-primary);
+}
+
+/* Settings */
+.sidebar-settings {
+  border-top-color: var(--border-default);
+}
+
+.setting-item {
+  color: var(--text-primary);
+}
+
+/* Canvas */
+.canvas-container {
+  background: var(--bg-canvas);
+}
+
+.react-flow-canvas {
+  background: var(--rf-background) !important;
+}
+
+/* Empty Canvas */
+.empty-canvas p {
+  color: var(--text-secondary);
+}
+
+/* Zoom Controls */
+.zoom-controls {
+  background: var(--surface-card);
+  border-color: var(--border-default);
+}
+
+.zoom-btn {
+  color: var(--text-primary);
+}
+
+.zoom-btn:hover {
+  background: var(--bg-hover);
+}
+
+.zoom-level-dropdown {
+  color: var(--text-secondary);
+  border-left-color: var(--border-default);
+}
+
+/* Floating Actions */
+.build-stack-label {
+  color: var(--text-secondary);
+  background: var(--surface-card);
+}
+
+.fab-chat {
+  background: var(--surface-card);
+  border-color: var(--border-default);
+  color: var(--text-primary);
+}
+
+.fab-chat:hover {
+  border-color: var(--brand-primary);
+  background: var(--brand-primary-light);
+}
+
+[data-theme="dark"] .fab-chat:hover {
+  background: rgba(16, 185, 129, 0.15);
+}
+
+/* Stack Name */
+.stack-name {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.stack-name:hover {
+  background: var(--bg-hover);
+}
+
+/* Buttons */
+.btn-icon {
+  background: var(--bg-tertiary);
+  border-color: var(--border-default);
+  color: var(--text-primary);
+}
+
+.btn-icon:hover {
+  background: var(--bg-hover);
+}
+
+.btn-save {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+}
+
+.btn-save:hover {
+  background: var(--btn-primary-hover);
+}
+
+/* Import Template Button */
+.btn-import-template {
+  background: var(--surface-card);
+  border-color: var(--border-default);
+  color: var(--brand-primary);
+}
+
+.btn-import-template:hover {
+  background: var(--brand-primary-light);
+  border-color: var(--brand-primary);
+}
+
+[data-theme="dark"] .btn-import-template:hover {
+  background: rgba(16, 185, 129, 0.15);
+}
+
+/* React Flow Overrides */
+.react-flow__background {
+  background-color: var(--rf-background) !important;
+}
+
+.react-flow__edge-path {
+  stroke: var(--rf-edge);
+}
+
+.react-flow__minimap {
+  background-color: var(--rf-minimap-bg) !important;
+}

@@ -4,6 +4,7 @@ import CreateStackModal from "../components/common/CreateStackModal";
 import EditStackModal from "../components/common/EditStackModal";
 import UserMenu from "../components/common/UserMenu";
 import Logo from "../components/common/Logo";
+import ThemeToggle from "../components/common/ThemeToggle";
 import "../styles/Dashboard.css";
 
 const Dashboard = () => {
@@ -36,6 +37,7 @@ const Dashboard = () => {
           <Logo size={32} showText={true} />
         </div>
         <div className="header-right">
+          <ThemeToggle />
           <UserMenu />
         </div>
       </header>

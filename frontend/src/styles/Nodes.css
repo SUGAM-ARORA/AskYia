@@ -823,3 +823,249 @@ input:checked + .toggle-slider:before {
     stroke-dashoffset: 0;
   }
 }
+
+.custom-node {
+  background: var(--node-bg);
+  border-color: var(--node-border);
+  box-shadow: var(--shadow-md);
+}
+
+.custom-node:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+/* Node Body Text */
+.node-body {
+  color: var(--text-primary);
+}
+
+.node-description {
+  color: var(--node-description);
+}
+
+.form-label-small {
+  color: var(--node-label);
+}
+
+/* Node Inputs */
+.form-input-small,
+.form-select {
+  background: var(--input-bg);
+  border-color: var(--input-border);
+  color: var(--input-text);
+}
+
+.form-input-small:focus,
+.form-select:focus {
+  border-color: var(--input-focus-border);
+  box-shadow: 0 0 0 2px var(--input-focus-ring);
+}
+
+.form-input-small::placeholder {
+  color: var(--input-placeholder);
+}
+
+/* Prompt Preview */
+.prompt-preview {
+  background: var(--bg-tertiary);
+  border-color: var(--border-default);
+  color: var(--text-primary);
+}
+
+/* Output Preview */
+.output-preview {
+  background: var(--bg-tertiary);
+  border-color: var(--border-default);
+  color: var(--text-secondary);
+}
+
+/* Slider */
+.slider {
+  background: var(--border-default);
+}
+
+.slider-value {
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+}
+
+/* Toggle */
+.toggle-label {
+  color: var(--text-primary);
+}
+
+.toggle-slider {
+  background-color: var(--border-default);
+}
+
+/* File Upload */
+.file-upload-button {
+  background: var(--bg-tertiary);
+  border-color: var(--border-default);
+  color: var(--text-secondary);
+}
+
+.file-upload-button:hover {
+  border-color: var(--brand-primary);
+  background: var(--brand-primary-light);
+  color: var(--brand-primary);
+}
+
+/* Node Footer */
+.node-footer {
+  border-top-color: var(--border-default);
+}
+
+.footer-handle-label {
+  color: var(--text-secondary);
+}
+
+/* Icon Button in Nodes */
+.icon-button {
+  color: var(--text-secondary);
+}
+
+.icon-button:hover {
+  color: var(--text-primary);
+}
+
+/* Node Toggle Button */
+.node-toggle {
+  color: var(--text-secondary);
+}
+
+.node-toggle:hover {
+  color: var(--text-primary);
+}
+
+/* LLM Node Header - Always White Text */
+.llm-node .node-header {
+  background: var(--node-llm-header-bg);
+}
+
+.llm-node .node-title {
+  color: var(--node-llm-header-text) !important;
+}
+
+.llm-node .node-toggle {
+  color: var(--node-llm-header-text) !important;
+  opacity: 0.8;
+}
+
+/* Input Node */
+.input-node .node-header {
+  background: var(--node-input-header-bg);
+  border-bottom: 1px solid var(--node-input-header-border);
+}
+
+.input-node .node-title {
+  color: var(--text-primary);
+}
+
+/* Knowledge Node */
+.knowledge-node .node-header {
+  background: var(--node-knowledge-header-bg);
+  border-bottom: 1px solid var(--node-knowledge-header-border);
+}
+
+.knowledge-node .node-title {
+  color: var(--text-primary);
+}
+
+/* Output Node */
+.output-node .node-header {
+  background: var(--node-output-header-bg);
+  border-bottom: 1px solid var(--border-default);
+}
+
+.output-node .node-title {
+  color: var(--text-primary);
+}
+
+/* Web Search Node */
+.websearch-node .node-header {
+  background: var(--node-websearch-header-bg);
+}
+
+[data-theme="dark"] .websearch-node .node-title {
+  color: #D1FAE5;
+}
+
+/* Conditional Node */
+.conditional-node .node-header {
+  background: var(--node-conditional-header-bg);
+}
+
+[data-theme="dark"] .conditional-node .node-title {
+  color: #FEF3C7;
+}
+
+/* Transform Node */
+.transform-node .node-header {
+  background: var(--node-transform-header-bg);
+}
+
+[data-theme="dark"] .transform-node .node-title {
+  color: #DBEAFE;
+}
+
+/* API Node */
+.api-node .node-header {
+  background: var(--node-api-header-bg);
+}
+
+[data-theme="dark"] .api-node .node-title {
+  color: #FCE7F3;
+}
+
+/* Memory Node */
+.memory-node .node-header {
+  background: var(--node-memory-header-bg);
+}
+
+[data-theme="dark"] .memory-node .node-title {
+  color: #E0E7FF;
+}
+
+/* Validator Node */
+.validator-node .node-header {
+  background: var(--node-validator-header-bg);
+}
+
+[data-theme="dark"] .validator-node .node-title {
+  color: #D1FAE5;
+}
+
+/* Memory Stats */
+.memory-stats {
+  background: var(--bg-tertiary);
+}
+
+.memory-stat {
+  color: var(--text-secondary);
+}
+
+/* Validation/Condition Outputs */
+.validation-output.valid,
+.condition-output.true {
+  background: var(--color-success-light);
+  color: var(--color-success-dark);
+}
+
+[data-theme="dark"] .validation-output.valid,
+[data-theme="dark"] .condition-output.true {
+  background: #064E3B;
+  color: #6EE7B7;
+}
+
+.validation-output.invalid,
+.condition-output.false {
+  background: var(--color-error-light);
+  color: var(--color-error-dark);
+}
+
+[data-theme="dark"] .validation-output.invalid,
+[data-theme="dark"] .condition-output.false {
+  background: #450A0A;
+  color: #FCA5A5;
+}

@@ -1,0 +1,101 @@
+/* ==============================================
+   LIGHT THEME
+   ============================================== */
+
+[data-theme="light"],
+:root {
+  /* ========== BACKGROUND COLORS ========== */
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F8FAFC;
+  --bg-tertiary: #F1F5F9;
+  --bg-canvas: #FAFBFC;
+  --bg-elevated: #FFFFFF;
+  --bg-hover: #F1F5F9;
+  --bg-active: #E2E8F0;
+  
+  /* Legacy mapping */
+  --bg-gray: #F5F5F5;
+  --card-white: #FFFFFF;
+  
+  /* ========== TEXT COLORS ========== */
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-tertiary: #94A3B8;
+  --text-inverse: #FFFFFF;
+  --text-disabled: #CBD5E1;
+  --text-link: #10B981;
+  --text-link-hover: #059669;
+  
+  /* ========== BORDER COLORS ========== */
+  --border-default: #E2E8F0;
+  --border-subtle: #F1F5F9;
+  --border-strong: #CBD5E1;
+  --border-focus: #10B981;
+  
+  /* Legacy mapping */
+  --border: #E5E7EB;
+  
+  /* ========== SURFACE COLORS ========== */
+  --surface-card: #FFFFFF;
+  --surface-overlay: rgba(0, 0, 0, 0.5);
+  --surface-tooltip: #1F2937;
+  
+  /* ========== INPUT COLORS ========== */
+  --input-bg: #FFFFFF;
+  --input-border: #D1D5DB;
+  --input-focus-border: #10B981;
+  --input-focus-ring: rgba(16, 185, 129, 0.15);
+  --input-placeholder: #9CA3AF;
+  --input-disabled-bg: #F3F4F6;
+  --input-text: #0F172A;
+  
+  /* ========== BUTTON COLORS ========== */
+  --btn-primary-bg: #10B981;
+  --btn-primary-hover: #059669;
+  --btn-primary-text: #FFFFFF;
+  --btn-secondary-bg: #F3F4F6;
+  --btn-secondary-hover: #E5E7EB;
+  --btn-secondary-text: #374151;
+  --btn-secondary-border: #D1D5DB;
+  
+  /* ========== NODE COLORS (Light) ========== */
+  --node-bg: #FFFFFF;
+  --node-border: #E5E7EB;
+  --node-header-text: #FFFFFF;
+  --node-body-bg: #FFFFFF;
+  --node-label: #374151;
+  --node-description: #6B7280;
+  
+  --node-llm-header-bg: #8B5CF6;
+  --node-llm-header-text: #FFFFFF;
+  
+  --node-input-header-bg: #FFFFFF;
+  --node-input-header-border: #E5E7EB;
+  
+  --node-knowledge-header-bg: #FFFFFF;
+  --node-knowledge-header-border: #E5E7EB;
+  
+  --node-websearch-header-bg: #D1FAE5;
+  --node-output-header-bg: #FFFFFF;
+  --node-conditional-header-bg: #FEF3C7;
+  --node-transform-header-bg: #DBEAFE;
+  --node-api-header-bg: #FCE7F3;
+  --node-memory-header-bg: #E0E7FF;
+  --node-validator-header-bg: #D1FAE5;
+  
+  /* ========== SCROLLBAR ========== */
+  --scrollbar-track: #F1F5F9;
+  --scrollbar-thumb: #CBD5E1;
+  --scrollbar-thumb-hover: #94A3B8;
+  
+  /* ========== SHADOWS ========== */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  
+  /* ========== REACT FLOW ========== */
+  --rf-background: #FAFBFC;
+  --rf-edge: #94A3B8;
+  --rf-minimap-bg: #F1F5F9;
+}
