@@ -1,0 +1,370 @@
+.generic-node {
+  min-width: 280px;
+  max-width: 320px;
+  background: var(--bg-primary);
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.generic-node.selected {
+  border-color: var(--node-color, var(--primary-color));
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.2), 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.generic-node.error-node {
+  border-color: #ef4444;
+}
+
+/* Header */
+.node-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  color: white;
+  background: var(--node-color, var(--primary-color));
+}
+
+.node-header.error {
+  background: #ef4444;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-icon {
+  font-size: 18px;
+}
+
+.header-label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.expand-toggle {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  transition: background 0.2s ease;
+}
+
+.expand-toggle:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Body */
+.node-body {
+  padding: 14px;
+}
+
+.node-description {
+  margin: 0 0 14px 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* Config Fields */
+.config-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.config-fields.advanced {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border-color);
+}
+
+.config-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.config-field.boolean-field {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.config-field.slider-field .field-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.field-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.field-label .required {
+  color: #ef4444;
+  margin-left: 2px;
+}
+
+.slider-value {
+  font-family: monospace;
+  background: var(--bg-secondary);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--text-primary);
+}
+
+.field-input,
+.field-select,
+.field-textarea,
+.field-code {
+  padding: 8px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 13px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.field-input:focus,
+.field-select:focus,
+.field-textarea:focus,
+.field-code:focus {
+  border-color: var(--node-color, var(--primary-color));
+  box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.1);
+}
+
+.field-textarea {
+  resize: vertical;
+  min-height: 60px;
+  font-family: inherit;
+}
+
+.field-code {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 12px;
+  background: #1e1e1e;
+  color: #d4d4d4;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.field-select {
+  cursor: pointer;
+}
+
+.field-slider {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--bg-tertiary);
+  outline: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+}
+
+.field-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--node-color, var(--primary-color));
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease;
+}
+
+.field-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+}
+
+/* Toggle Switch */
+.toggle-switch {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  cursor: pointer;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--bg-tertiary);
+  border-radius: 22px;
+  transition: all 0.3s ease;
+}
+
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  left: 3px;
+  bottom: 3px;
+  background: white;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background: var(--node-color, var(--primary-color));
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+  transform: translateX(18px);
+}
+
+/* Provider Grid */
+.provider-field {
+  gap: 8px;
+}
+
+.provider-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.provider-btn {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  transition: all 0.2s ease;
+}
+
+.provider-btn:hover {
+  transform: scale(1.05);
+}
+
+.provider-btn.active {
+  border-width: 2px;
+}
+
+.provider-btn .key-dot {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 8px;
+  color: #10b981;
+}
+
+/* Advanced Toggle */
+.advanced-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 8px 0;
+  margin-top: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.advanced-toggle:hover {
+  color: var(--text-primary);
+}
+
+.toggle-icon {
+  font-size: 10px;
+}
+
+/* Footer */
+.node-footer {
+  padding: 8px 14px;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+}
+
+.output-labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.output-label {
+  font-size: 10px;
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+/* Handles */
+.node-handle {
+  width: 12px !important;
+  height: 12px !important;
+  border: 2px solid white !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.node-handle:hover {
+  transform: scale(1.2);
+}
+
+.input-handle {
+  background: var(--node-color, #3b82f6) !important;
+  left: -6px !important;
+}
+
+.output-handle {
+  background: #10b981 !important;
+  right: -6px !important;
+}
+
+/* Animations */
+@keyframes nodeAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.generic-node {
+  animation: nodeAppear 0.2s ease-out;
+}

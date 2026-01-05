@@ -554,3 +554,233 @@
   border-color: #F87171;
   color: #FCA5A5;
 }
+
+/* Provider Badge Enhancements */
+.chat-provider-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 2px solid;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.chat-provider-badge.has-key {
+  opacity: 1;
+}
+
+.chat-provider-badge.no-key {
+  opacity: 0.8;
+  border-style: dashed;
+}
+
+.chat-provider-badge .provider-icon {
+  font-size: 14px;
+}
+
+.chat-provider-badge .key-warning {
+  margin-left: 4px;
+  animation: pulse 1.5s ease infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Empty State Enhancements */
+.chat-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  height: 100%;
+}
+
+.chat-empty h3 {
+  margin: 16px 0 8px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.chat-empty > p {
+  margin: 0 0 20px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.chat-provider-info-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.provider-icon-large {
+  font-size: 32px;
+}
+
+.provider-details {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.provider-name-large {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.model-name {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.key-status {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.key-status.success {
+  background: #D1FAE5;
+  color: #059669;
+}
+
+.key-status.error {
+  background: #FEE2E2;
+  color: #DC2626;
+  animation: pulse 1.5s ease infinite;
+}
+
+.api-key-hint {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  background: var(--bg-tertiary);
+  padding: 10px 16px;
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+.api-key-hint strong {
+  color: var(--primary-color);
+}
+
+/* Message Enhancements */
+.message-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.message-meta {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 11px;
+  color: var(--text-tertiary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Loading State */
+.message-content.loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.typing-indicator {
+  display: flex;
+  gap: 4px;
+}
+
+.typing-indicator .dot {
+  width: 8px;
+  height: 8px;
+  background: var(--primary-color);
+  border-radius: 50%;
+  animation: bounce 1.4s ease-in-out infinite;
+}
+
+.typing-indicator .dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.typing-indicator .dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-indicator .dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes bounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-8px);
+  }
+}
+
+.loading-text {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* API Warning */
+.chat-api-warning {
+  padding: 10px 16px;
+  background: #FEF3C7;
+  color: #92400E;
+  font-size: 12px;
+  text-align: center;
+  border-bottom: 1px solid #FCD34D;
+}
+
+/* Send Button Loading */
+.send-loading {
+  animation: spin 1s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Web Indicator */
+.chat-web-indicator {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #DBEAFE, #E0E7FF);
+  color: #1E40AF;
+  font-size: 12px;
+  text-align: center;
+  border-bottom: 1px solid #93C5FD;
+}
+
+/* Error Message Styling */
+.chat-message.error .message-content {
+  background: #FEE2E2;
+  color: #991B1B;
+  border: 1px solid #FECACA;
+}
+
+.chat-message.error .message-icon {
+  background: #FEE2E2;
+  color: #DC2626;
+}
