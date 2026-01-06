@@ -7,11 +7,33 @@ export const validateWorkflow = async (definition: WorkflowDefinition) => {
 };
 
 export const executeWorkflow = async (
-  definition: WorkflowDefinition,
+  definition: WorkflowDefinition | any,
   query: string,
   prompt?: string,
   web_search?: boolean
 ) => {
-  const { data } = await api.post("/workflows/execute", { definition, query, prompt, web_search });
-  return data.result;
+  try {
+    const { data } = await api.post("/workflows/execute", { 
+      definition, 
+      query, 
+      prompt, 
+      web_search 
+    });
+    
+    // Handle different response structures
+    if (data.result) {
+      return data.result;
+    }
+    return data;
+  } catch (error: any) {
+    console.error("Workflow execution failed:", error);
+    
+    // Extract error message
+    const message = error.response?.data?.detail || 
+                    error.response?.data?.message || 
+                    error.message || 
+                    'Workflow execution failed';
+    
+    throw new Error(message);
+  }
 };

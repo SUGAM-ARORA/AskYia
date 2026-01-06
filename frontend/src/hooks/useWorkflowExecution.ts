@@ -2,8 +2,7 @@ import { useCallback, useRef } from "react";
 import { Node, Edge } from "reactflow";
 import { useExecutionStore } from "../store/executionSlice";
 import { useApiKeysStore } from "../store/apiKeysSlice";
-import { LLMProvider } from "../types/llm.types";
-import { api } from "../services/api";
+import { executeWorkflow } from "../services/workflowService";
 
 interface ExecutionOptions {
   onComplete?: (result: any) => void;
@@ -22,43 +21,41 @@ export const useWorkflowExecution = () => {
     cancelExecution,
     isExecuting,
     currentExecution,
+    setFinalOutput,
+    clearOutput, // ✅ Add this
   } = useExecutionStore();
-  
+
   const { getApiKey } = useApiKeysStore();
   const abortControllerRef = useRef<AbortController | null>(null);
 
   // Get execution order from nodes and edges (topological sort)
   const getExecutionOrder = useCallback((nodes: Node[], edges: Edge[]): string[] => {
-    const nodeMap = new Map(nodes.map(n => [n.id, n]));
     const inDegree = new Map<string, number>();
     const adjacency = new Map<string, string[]>();
-    
-    // Initialize
+
     nodes.forEach(node => {
       inDegree.set(node.id, 0);
       adjacency.set(node.id, []);
     });
-    
-    // Build graph
+
     edges.forEach(edge => {
       const targets = adjacency.get(edge.source) || [];
       targets.push(edge.target);
       adjacency.set(edge.source, targets);
       inDegree.set(edge.target, (inDegree.get(edge.target) || 0) + 1);
     });
-    
-    // Kahn's algorithm for topological sort
+
     const queue: string[] = [];
     const result: string[] = [];
-    
+
     inDegree.forEach((degree, nodeId) => {
       if (degree === 0) queue.push(nodeId);
     });
-    
+
     while (queue.length > 0) {
       const nodeId = queue.shift()!;
       result.push(nodeId);
-      
+
       const neighbors = adjacency.get(nodeId) || [];
       neighbors.forEach(neighbor => {
         const newDegree = (inDegree.get(neighbor) || 0) - 1;
@@ -66,76 +63,53 @@ export const useWorkflowExecution = () => {
         if (newDegree === 0) queue.push(neighbor);
       });
     }
-    
+
     return result;
   }, []);
 
-  // Get incoming edges for a node
-  const getIncomingEdges = useCallback((nodeId: string, edges: Edge[]): Edge[] => {
-    return edges.filter(edge => edge.target === nodeId);
-  }, []);
-
-  // Get outgoing edges for a node
-  const getOutgoingEdges = useCallback((nodeId: string, edges: Edge[]): Edge[] => {
-    return edges.filter(edge => edge.source === nodeId);
-  }, []);
-
-  // Simulate node execution with delay
-  const executeNode = useCallback(async (
-    node: Node,
-    inputData: any,
-    signal: AbortSignal
-  ): Promise<any> => {
-    const nodeType = node.type?.toLowerCase();
-    const nodeData = node.data || {};
+  // Build workflow definition from nodes and edges
+  const buildWorkflowDefinition = useCallback((nodes: Node[], edges: Edge[]) => {
+    const executionOrder = getExecutionOrder(nodes, edges);
     
-    // Simulate processing time based on node type
-    const getProcessingTime = () => {
-      switch (nodeType) {
-        case 'llm': return 1500 + Math.random() * 2000; // 1.5-3.5s for LLM
-        case 'knowledge': return 800 + Math.random() * 1200; // 0.8-2s for KB
-        case 'websearch': return 1000 + Math.random() * 1500; // 1-2.5s for search
-        case 'api': return 500 + Math.random() * 1000; // 0.5-1.5s for API
-        case 'transform': return 200 + Math.random() * 300; // 0.2-0.5s for transform
-        case 'conditional': return 100 + Math.random() * 200; // 0.1-0.3s for conditional
-        case 'validator': return 150 + Math.random() * 250; // 0.15-0.4s for validator
-        default: return 300 + Math.random() * 500;
-      }
+    const llmNodes = nodes.filter(n => n.type === 'llm' || n.type === 'llmEngine');
+
+    return {
+      id: `workflow-${Date.now()}`,
+      nodes: nodes.map(n => ({
+        id: n.id,
+        type: n.type,
+        data: n.data,
+        position: n.position,
+      })),
+      edges: edges.map(e => ({
+        id: e.id,
+        source: e.source,
+        target: e.target,
+        sourceHandle: e.sourceHandle,
+        targetHandle: e.targetHandle,
+      })),
+      executionOrder,
+      llmConfig: llmNodes[0]?.data || {},
     };
-    
-    await new Promise((resolve, reject) => {
-      const timeout = setTimeout(resolve, getProcessingTime());
-      signal.addEventListener('abort', () => {
-        clearTimeout(timeout);
-        reject(new Error('Execution cancelled'));
-      });
-    });
-    
-    // Return mock output based on node type
-    switch (nodeType) {
-      case 'input':
-        return { query: inputData?.query || nodeData.query || "User query" };
-      case 'llm':
-        return { response: `AI response from ${nodeData.provider || 'openai'}/${nodeData.model || 'gpt-4o-mini'}` };
-      case 'knowledge':
-        return { context: "Retrieved context from knowledge base..." };
-      case 'websearch':
-        return { results: ["Search result 1", "Search result 2", "Search result 3"] };
-      case 'output':
-        return { finalOutput: inputData };
-      case 'transform':
-        return { transformed: inputData };
-      case 'conditional':
-        return { condition: true, branch: 'true' };
-      case 'validator':
-        return { valid: true, data: inputData };
-      case 'memory':
-        return { history: [] };
-      case 'api':
-        return { response: { status: 200, data: {} } };
-      default:
-        return inputData;
-    }
+  }, [getExecutionOrder]);
+
+  // Extract query from input node
+  const getQueryFromNodes = useCallback((nodes: Node[]): string => {
+    const inputNode = nodes.find(n => 
+      n.type === 'input' || 
+      n.type === 'userQuery' ||
+      n.data?.nodeType === 'user_query'
+    );
+    return inputNode?.data?.query || inputNode?.data?.userQuery || '';
+  }, []);
+
+  // Extract prompt/system prompt from LLM nodes
+  const getPromptFromNodes = useCallback((nodes: Node[]): string | undefined => {
+    const llmNode = nodes.find(n => 
+      n.type === 'llm' || 
+      n.type === 'llmEngine'
+    );
+    return llmNode?.data?.systemPrompt || llmNode?.data?.prompt;
   }, []);
 
   // Main execution function
@@ -150,11 +124,11 @@ export const useWorkflowExecution = () => {
       return;
     }
 
-    // Create abort controller
-    abortControllerRef.current = new AbortController();
-    const signal = abortControllerRef.current.signal;
+    // ✅ CRITICAL: Clear previous output before starting new execution
+    clearOutput();
 
-    // Start execution
+    abortControllerRef.current = new AbortController();
+
     const nodeIds = nodes.map(n => n.id);
     const edgeIds = edges.map(e => e.id);
     const executionId = startExecution("workflow", nodeIds, edgeIds);
@@ -163,102 +137,102 @@ export const useWorkflowExecution = () => {
     addLog({ level: 'info', message: `Query: ${query}` });
 
     try {
-      // Get execution order
+      const definition = buildWorkflowDefinition(nodes, edges);
       const executionOrder = getExecutionOrder(nodes, edges);
-      addLog({ level: 'debug', message: `Execution order: ${executionOrder.join(' → ')}` });
-
-      const nodeOutputs: Record<string, any> = {};
       
-      // Execute nodes in order
-      for (const nodeId of executionOrder) {
-        if (signal.aborted) {
-          throw new Error('Execution cancelled');
-        }
+      const actualQuery = query || getQueryFromNodes(nodes);
+      const prompt = getPromptFromNodes(nodes);
 
-        const node = nodes.find(n => n.id === nodeId);
-        if (!node) continue;
-
-        // Update incoming edges to active
-        const incomingEdges = getIncomingEdges(nodeId, edges);
-        for (const edge of incomingEdges) {
-          updateEdgeStatus(edge.id, 'active');
-          await new Promise(r => setTimeout(r, 200)); // Brief animation delay
-        }
-
-        // Start node execution
-        updateNodeStatus(nodeId, 'running');
-        options?.onNodeStart?.(nodeId);
-        addLog({ 
-          level: 'info', 
-          message: `Executing node: ${node.type}`,
-          nodeId,
-        });
-
-        try {
-          // Gather inputs from connected nodes
-          const inputs: any = { query };
-          for (const edge of incomingEdges) {
-            if (nodeOutputs[edge.source]) {
-              inputs[edge.sourceHandle || 'default'] = nodeOutputs[edge.source];
-            }
-          }
-
-          // Execute the node
-          const output = await executeNode(node, inputs, signal);
-          nodeOutputs[nodeId] = output;
-
-          // Update node and edges as complete
-          updateNodeStatus(nodeId, 'success', { output });
-          options?.onNodeComplete?.(nodeId, output);
-          
-          for (const edge of incomingEdges) {
-            updateEdgeStatus(edge.id, 'completed');
-          }
-
-          addLog({ 
-            level: 'info', 
-            message: `Node completed successfully`,
-            nodeId,
-            data: output,
-          });
-
-        } catch (nodeError: any) {
-          updateNodeStatus(nodeId, 'error', { error: nodeError.message });
-          addLog({ 
-            level: 'error', 
-            message: `Node failed: ${nodeError.message}`,
-            nodeId,
-          });
-          
-          if (signal.aborted) {
-            throw nodeError;
-          }
-          
-          // Continue execution for non-critical nodes or throw for critical ones
-          if (node.type === 'llm' || node.type === 'output') {
-            throw nodeError;
-          }
-        }
-
-        // Small delay between nodes for visual effect
-        await new Promise(r => setTimeout(r, 300));
+      if (!actualQuery) {
+        throw new Error('No query provided. Please enter a query in the User Query node.');
       }
 
-      // Complete execution
-      const finalOutput = nodeOutputs[executionOrder[executionOrder.length - 1]];
-      completeExecution(finalOutput);
+      addLog({ level: 'debug', message: `Execution order: ${executionOrder.join(' → ')}` });
+      addLog({ level: 'info', message: `Sending to backend API...` });
+
+      // Animate nodes while waiting for backend
+      const animationPromise = (async () => {
+        for (let i = 0; i < executionOrder.length; i++) {
+          const nodeId = executionOrder[i];
+          const node = nodes.find(n => n.id === nodeId);
+          if (!node) continue;
+
+          options?.onNodeStart?.(nodeId);
+          
+          const incomingEdges = edges.filter(e => e.target === nodeId);
+          for (const edge of incomingEdges) {
+            updateEdgeStatus(edge.id, 'active');
+          }
+          
+          updateNodeStatus(nodeId, 'running');
+          addLog({ level: 'info', message: `Executing: ${node.type || node.data?.label}`, nodeId });
+
+          const delay = node.type === 'llm' || node.type === 'llmEngine' ? 2000 : 500;
+          await new Promise(r => setTimeout(r, delay));
+        }
+      })();
+
+      // Call real backend API
+      const backendPromise = executeWorkflow(
+        definition,
+        actualQuery,
+        prompt,
+        false
+      );
+
+      const [_, backendResult] = await Promise.all([
+        animationPromise,
+        backendPromise
+      ]);
+
+      addLog({ level: 'info', message: `Backend response received` });
+      addLog({ level: 'debug', message: `Result: ${JSON.stringify(backendResult).slice(0, 200)}...` });
+
+      // Mark all nodes as complete
+      for (const nodeId of executionOrder) {
+        const incomingEdges = edges.filter(e => e.target === nodeId);
+        for (const edge of incomingEdges) {
+          updateEdgeStatus(edge.id, 'completed');
+        }
+        
+        updateNodeStatus(nodeId, 'success', { 
+          output: nodeId === executionOrder[executionOrder.length - 1] 
+            ? backendResult 
+            : { processed: true }
+        });
+        options?.onNodeComplete?.(nodeId, backendResult);
+      }
+
+      // Extract and store final output
+      const finalAnswer = backendResult?.answer || 
+                          backendResult?.result?.answer || 
+                          backendResult?.output ||
+                          JSON.stringify(backendResult);
+
+      setFinalOutput(finalAnswer);
+      completeExecution({ answer: finalAnswer, raw: backendResult });
       addLog({ level: 'info', message: 'Workflow execution completed successfully' });
-      options?.onComplete?.(finalOutput);
+      
+      options?.onComplete?.({ answer: finalAnswer, raw: backendResult });
+
+      return { answer: finalAnswer, raw: backendResult };
 
     } catch (error: any) {
-      if (error.message === 'Execution cancelled') {
-        cancelExecution();
-        addLog({ level: 'warning', message: 'Workflow execution cancelled' });
-      } else {
-        completeExecution(undefined, error.message);
-        addLog({ level: 'error', message: `Workflow execution failed: ${error.message}` });
-        options?.onError?.(error.message);
+      const errorMessage = error.message || 'Unknown error occurred';
+      
+      const executionOrder = getExecutionOrder(nodes, edges);
+      for (const nodeId of executionOrder) {
+        const state = useExecutionStore.getState();
+        if (state.currentExecution?.nodeStates[nodeId]?.status === 'running') {
+          updateNodeStatus(nodeId, 'error', { error: errorMessage });
+        }
       }
+
+      completeExecution(undefined, errorMessage);
+      addLog({ level: 'error', message: `Workflow execution failed: ${errorMessage}` });
+      options?.onError?.(errorMessage);
+      
+      return { error: errorMessage };
     }
   }, [
     isExecuting,
@@ -267,10 +241,12 @@ export const useWorkflowExecution = () => {
     updateEdgeStatus,
     addLog,
     completeExecution,
-    cancelExecution,
+    setFinalOutput,
+    clearOutput,
+    buildWorkflowDefinition,
     getExecutionOrder,
-    getIncomingEdges,
-    executeNode,
+    getQueryFromNodes,
+    getPromptFromNodes,
   ]);
 
   // Cancel execution
@@ -279,7 +255,8 @@ export const useWorkflowExecution = () => {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
     }
-  }, []);
+    cancelExecution();
+  }, [cancelExecution]);
 
   return {
     execute,

@@ -1,11 +1,10 @@
 import { create } from "zustand";
-import { 
-  NodeStatus, 
-  ExecutionStatus, 
-  NodeExecutionState, 
+import {
+  NodeStatus,
+  NodeExecutionState,
   EdgeExecutionState,
   WorkflowExecution,
-  ExecutionLog 
+  ExecutionLog
 } from "../types/execution.types";
 import { v4 as uuidv4 } from "uuid";
 
@@ -14,13 +13,16 @@ interface ExecutionState {
   currentExecution: WorkflowExecution | null;
   isExecuting: boolean;
   
+  // ✅ Final output from backend
+  finalOutput: string | null;
+
   // Execution history
   executionHistory: WorkflowExecution[];
-  
+
   // UI state
   showExecutionPanel: boolean;
   selectedExecutionId: string | null;
-  
+
   // Actions
   startExecution: (workflowId: string, nodeIds: string[], edgeIds: string[]) => string;
   updateNodeStatus: (nodeId: string, status: NodeStatus, data?: Partial<NodeExecutionState>) => void;
@@ -29,13 +31,17 @@ interface ExecutionState {
   completeExecution: (result?: any, error?: string) => void;
   cancelExecution: () => void;
   resetExecution: () => void;
-  
+  setFinalOutput: (output: string | null) => void;
+  clearOutput: () => void;
+
   // UI Actions
   toggleExecutionPanel: () => void;
   setShowExecutionPanel: (show: boolean) => void;
   selectExecution: (executionId: string | null) => void;
   clearHistory: () => void;
-  
+  clearCurrentExecution: () => void;
+  clearAll: () => void;
+
   // Getters
   getNodeStatus: (nodeId: string) => NodeStatus;
   getEdgeStatus: (edgeId: string) => EdgeExecutionState['status'];
@@ -45,23 +51,24 @@ interface ExecutionState {
 export const useExecutionStore = create<ExecutionState>((set, get) => ({
   currentExecution: null,
   isExecuting: false,
+  finalOutput: null,
   executionHistory: [],
   showExecutionPanel: false,
   selectedExecutionId: null,
 
   startExecution: (workflowId: string, nodeIds: string[], edgeIds: string[]) => {
     const executionId = uuidv4();
-    
+
     const nodeStates: Record<string, NodeExecutionState> = {};
     nodeIds.forEach(id => {
       nodeStates[id] = { nodeId: id, status: 'pending' };
     });
-    
+
     const edgeStates: Record<string, EdgeExecutionState> = {};
     edgeIds.forEach(id => {
       edgeStates[id] = { edgeId: id, status: 'idle' };
     });
-    
+
     const execution: WorkflowExecution = {
       id: executionId,
       workflowId,
@@ -76,49 +83,57 @@ export const useExecutionStore = create<ExecutionState>((set, get) => ({
         percentage: 0,
       },
     };
-    
-    set({ 
-      currentExecution: execution, 
+
+    set({
+      currentExecution: execution,
       isExecuting: true,
       showExecutionPanel: true,
+      finalOutput: null,
     });
-    
+
     return executionId;
+  },
+
+  setFinalOutput: (output: string | null) => {
+    set({ finalOutput: output });
+  },
+
+  clearOutput: () => {
+    set({ finalOutput: null });
   },
 
   updateNodeStatus: (nodeId: string, status: NodeStatus, data?: Partial<NodeExecutionState>) => {
     set((state) => {
       if (!state.currentExecution) return state;
-      
+
       const nodeState = state.currentExecution.nodeStates[nodeId] || { nodeId, status: 'idle' };
       const updatedNodeState: NodeExecutionState = {
         ...nodeState,
         status,
         ...data,
       };
-      
+
       if (status === 'running' && !nodeState.startTime) {
         updatedNodeState.startTime = Date.now();
       }
-      
+
       if ((status === 'success' || status === 'error') && nodeState.startTime) {
         updatedNodeState.endTime = Date.now();
         updatedNodeState.duration = updatedNodeState.endTime - nodeState.startTime;
       }
-      
+
       const newNodeStates = {
         ...state.currentExecution.nodeStates,
         [nodeId]: updatedNodeState,
       };
-      
-      // Calculate progress
+
       const completedCount = Object.values(newNodeStates).filter(
         n => n.status === 'success' || n.status === 'error' || n.status === 'skipped'
       ).length;
-      
-      const currentNode = status === 'running' ? nodeId : 
+
+      const currentNode = status === 'running' ? nodeId :
         Object.entries(newNodeStates).find(([_, n]) => n.status === 'running')?.[0];
-      
+
       return {
         currentExecution: {
           ...state.currentExecution,
@@ -137,14 +152,14 @@ export const useExecutionStore = create<ExecutionState>((set, get) => ({
   updateEdgeStatus: (edgeId: string, status: EdgeExecutionState['status']) => {
     set((state) => {
       if (!state.currentExecution) return state;
-      
+
       return {
         currentExecution: {
           ...state.currentExecution,
           edgeStates: {
             ...state.currentExecution.edgeStates,
-            [edgeId]: { 
-              edgeId, 
+            [edgeId]: {
+              edgeId,
               status,
               dataTransferred: status === 'completed',
             },
@@ -157,13 +172,13 @@ export const useExecutionStore = create<ExecutionState>((set, get) => ({
   addLog: (log: Omit<ExecutionLog, 'id' | 'timestamp'>) => {
     set((state) => {
       if (!state.currentExecution) return state;
-      
+
       const newLog: ExecutionLog = {
         ...log,
         id: uuidv4(),
         timestamp: Date.now(),
       };
-      
+
       return {
         currentExecution: {
           ...state.currentExecution,
@@ -176,7 +191,7 @@ export const useExecutionStore = create<ExecutionState>((set, get) => ({
   completeExecution: (result?: any, error?: string) => {
     set((state) => {
       if (!state.currentExecution) return state;
-      
+
       const completedExecution: WorkflowExecution = {
         ...state.currentExecution,
         status: error ? 'failed' : 'completed',
@@ -190,11 +205,11 @@ export const useExecutionStore = create<ExecutionState>((set, get) => ({
           currentNode: undefined,
         },
       };
-      
+
       return {
         currentExecution: completedExecution,
         isExecuting: false,
-        executionHistory: [completedExecution, ...state.executionHistory].slice(0, 50),
+        executionHistory: [completedExecution, ...state.executionHistory].slice(0, 20),
       };
     });
   },
@@ -202,18 +217,19 @@ export const useExecutionStore = create<ExecutionState>((set, get) => ({
   cancelExecution: () => {
     set((state) => {
       if (!state.currentExecution) return state;
-      
+
       const cancelledExecution: WorkflowExecution = {
         ...state.currentExecution,
         status: 'cancelled',
         endTime: Date.now(),
         duration: Date.now() - state.currentExecution.startTime,
       };
-      
+
       return {
         currentExecution: cancelledExecution,
         isExecuting: false,
-        executionHistory: [cancelledExecution, ...state.executionHistory].slice(0, 50),
+        finalOutput: null,
+        executionHistory: [cancelledExecution, ...state.executionHistory].slice(0, 20),
       };
     });
   },
@@ -222,6 +238,28 @@ export const useExecutionStore = create<ExecutionState>((set, get) => ({
     set({
       currentExecution: null,
       isExecuting: false,
+      finalOutput: null,
+    });
+  },
+  clearCurrentExecution: () => {
+    set({
+      currentExecution: null,
+      isExecuting: false,
+      finalOutput: null,
+    });
+  },
+  clearHistory: () => {
+    set({ executionHistory: [] });
+  },
+
+  clearAll: () => {
+    set({
+      currentExecution: null,
+      isExecuting: false,
+      finalOutput: null,
+      executionHistory: [],
+      showExecutionPanel: false,
+      selectedExecutionId: null,
     });
   },
 
@@ -235,10 +273,6 @@ export const useExecutionStore = create<ExecutionState>((set, get) => ({
 
   selectExecution: (executionId: string | null) => {
     set({ selectedExecutionId: executionId });
-  },
-
-  clearHistory: () => {
-    set({ executionHistory: [] });
   },
 
   getNodeStatus: (nodeId: string) => {

@@ -12,6 +12,11 @@ const ExecutionPanel = ({ onClose }: ExecutionPanelProps) => {
     currentExecution, 
     isExecuting,
     executionHistory,
+    finalOutput,
+    clearCurrentExecution,
+    clearHistory,
+    clearAll,
+    clearOutput,
   } = useExecutionStore();
 
   const formatDuration = (ms: number) => {
@@ -55,11 +60,54 @@ const ExecutionPanel = ({ onClose }: ExecutionPanelProps) => {
     return [...currentExecution.logs].reverse().slice(0, 50);
   }, [currentExecution]);
 
+  // Handle clear actions
+  const handleReset = () => {
+    if (!isExecuting) {
+      clearCurrentExecution();
+    }
+  };
+
+  const handleClearHistory = () => {
+    clearHistory();
+  };
+
+  const handleClearAll = () => {
+    if (!isExecuting) {
+      clearAll();
+      onClose();
+    }
+  };
+
   return (
     <div className="execution-panel">
       <div className="execution-panel-header">
         <h3>⚡ Execution</h3>
-        <button className="panel-close-btn" onClick={onClose}>✕</button>
+        <div className="panel-header-actions">
+          <button 
+            className="panel-action-btn reset"
+            onClick={handleReset}
+            disabled={isExecuting}
+            title="Reset current execution"
+          >
+            🔄
+          </button>
+          <button 
+            className="panel-action-btn"
+            onClick={handleClearHistory}
+            title="Clear history"
+          >
+            🗑️
+          </button>
+          <button 
+            className="panel-action-btn danger"
+            onClick={handleClearAll}
+            disabled={isExecuting}
+            title="Clear all"
+          >
+            ❌
+          </button>
+          <button className="panel-close-btn" onClick={onClose}>✕</button>
+        </div>
       </div>
 
       {currentExecution ? (
@@ -99,6 +147,26 @@ const ExecutionPanel = ({ onClose }: ExecutionPanelProps) => {
                 <span className="running-indicator"></span>
                 {currentExecution.progress.currentNode}
               </span>
+            </div>
+          )}
+          {finalOutput && !isExecuting && (
+            <div className="output-preview-section">
+              <div className="output-preview-header">
+                <h4>📤 Output</h4>
+                <button 
+                  className="output-clear-btn"
+                  onClick={() => clearOutput()}
+                  title="Clear output"
+                >
+                  🗑️
+                </button>
+              </div>
+              <div className="output-preview-content">
+                {finalOutput.length > 200 
+                  ? finalOutput.slice(0, 200) + '...' 
+                  : finalOutput
+                }
+              </div>
             </div>
           )}
 
@@ -147,7 +215,16 @@ const ExecutionPanel = ({ onClose }: ExecutionPanelProps) => {
       {/* History Section */}
       {executionHistory.length > 0 && (
         <div className="history-section">
-          <h4>Recent Executions</h4>
+          <div className="history-header">
+            <h4>Recent Executions</h4>
+            <button 
+              className="history-clear-btn"
+              onClick={handleClearHistory}
+              title="Clear history"
+            >
+              Clear
+            </button>
+          </div>
           <div className="history-list">
             {executionHistory.slice(0, 5).map((execution) => (
               <div key={execution.id} className={`history-item ${execution.status}`}>
