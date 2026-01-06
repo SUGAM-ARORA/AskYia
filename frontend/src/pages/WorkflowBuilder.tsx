@@ -1,4 +1,7 @@
-import { useCallback, useRef, useState } from "react";
+// frontend/src/pages/WorkflowBuilder.tsx
+import { useCallback, useRef, useState, useEffect } from "react";
+import { useKeyboardShortcuts } from "../hooks/useKeyboardShortcuts";
+import KeyboardShortcutsModal from "../components/common/KeyboardShortcutsModal";
 import ReactFlow, {
   Background,
   BackgroundVariant,
@@ -143,12 +146,44 @@ const WorkflowBuilderContent = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<NodeCategory | "all">("all");
   const [isComponentLibraryCollapsed, setIsComponentLibraryCollapsed] = useState(false);
+
+  // Mobile responsive state
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const { zoomIn, zoomOut, fitView, getZoom } = useReactFlow();
 
   // Workflow execution hook
   const { execute, cancel } = useWorkflowExecution();
+
+  // Check for mobile viewport
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+      // Auto-collapse sidebar on mobile
+      if (window.innerWidth <= 768) {
+        setIsComponentLibraryCollapsed(true);
+      }
+    };
+    
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  // Close mobile sidebar when clicking overlay
+  const handleOverlayClick = () => {
+    setIsMobileSidebarOpen(false);
+  };
+
+  // Toggle mobile sidebar
+  const toggleMobileSidebar = () => {
+    if (isMobile) {
+      setIsMobileSidebarOpen(!isMobileSidebarOpen);
+      setIsComponentLibraryCollapsed(false);
+    }
+  };
 
   // Filter nodes based on search and category
   const filteredNodes = NODE_DEFINITIONS.filter((node) => {
@@ -220,8 +255,13 @@ const WorkflowBuilderContent = () => {
       };
 
       setNodes((nds) => nds.concat(newNode));
+      
+      // Close mobile sidebar after adding node
+      if (isMobile) {
+        setIsMobileSidebarOpen(false);
+      }
     },
-    [setNodes, snapToGridEnabled]
+    [setNodes, snapToGridEnabled, isMobile]
   );
 
   const onNodeDragStop = useCallback(
@@ -261,6 +301,11 @@ const WorkflowBuilderContent = () => {
       },
     };
     setNodes((nds) => nds.concat(newNode));
+    
+    // Close mobile sidebar after adding node
+    if (isMobile) {
+      setIsMobileSidebarOpen(false);
+    }
   };
 
   const handleSave = () => {
@@ -406,6 +451,125 @@ const WorkflowBuilderContent = () => {
     setZoom(Math.round(getZoom() * 100));
   }, [getZoom]);
 
+  // Define keyboard shortcuts
+  const shortcuts = [
+    {
+      key: "s",
+      ctrl: true,
+      description: "Save workflow",
+      category: "File",
+      action: () => handleSave(),
+    },
+    {
+      key: "o",
+      ctrl: true,
+      description: "Open templates",
+      category: "File",
+      action: () => setIsTemplateModalOpen(true),
+    },
+    {
+      key: "e",
+      ctrl: true,
+      description: "Export workflow",
+      category: "File",
+      action: () => handleExportJSON(),
+    },
+    {
+      key: "i",
+      ctrl: true,
+      description: "Import workflow",
+      category: "File",
+      action: () => handleImportJSON(),
+    },
+    {
+      key: "Enter",
+      ctrl: true,
+      description: "Run workflow",
+      category: "Execution",
+      action: () => handleBuildStack(),
+    },
+    {
+      key: "Escape",
+      description: "Cancel / Close modal",
+      category: "General",
+      action: () => {
+        if (isChatOpen) toggleChat();
+        else if (showExecutionPanel) setShowExecutionPanel(false);
+        else if (isApiKeyManagerOpen) setIsApiKeyManagerOpen(false);
+        else if (isSaveModalOpen) setIsSaveModalOpen(false);
+        else if (isTemplateModalOpen) setIsTemplateModalOpen(false);
+        else if (isMobileSidebarOpen) setIsMobileSidebarOpen(false);
+      },
+    },
+    {
+      key: "k",
+      ctrl: true,
+      description: "Open API key manager",
+      category: "Settings",
+      action: () => setIsApiKeyManagerOpen(true),
+    },
+    {
+      key: "l",
+      ctrl: true,
+      description: "Toggle execution logs",
+      category: "View",
+      action: () => setShowExecutionPanel(!showExecutionPanel),
+    },
+    {
+      key: "b",
+      ctrl: true,
+      description: "Toggle sidebar",
+      category: "View",
+      action: () => {
+        if (isMobile) {
+          setIsMobileSidebarOpen(!isMobileSidebarOpen);
+        } else {
+          setIsComponentLibraryCollapsed(!isComponentLibraryCollapsed);
+        }
+      },
+    },
+    {
+      key: "/",
+      ctrl: true,
+      description: "Open chat",
+      category: "Chat",
+      action: () => toggleChat(),
+    },
+    {
+      key: "=",
+      ctrl: true,
+      description: "Zoom in",
+      category: "Canvas",
+      action: () => handleZoomIn(),
+    },
+    {
+      key: "-",
+      ctrl: true,
+      description: "Zoom out",
+      category: "Canvas",
+      action: () => handleZoomOut(),
+    },
+    {
+      key: "0",
+      ctrl: true,
+      description: "Fit to view",
+      category: "Canvas",
+      action: () => handleFitView(),
+    },
+    {
+      key: "g",
+      ctrl: true,
+      description: "Toggle snap to grid",
+      category: "Canvas",
+      action: () => setSnapToGridEnabled(!snapToGridEnabled),
+    },
+  ];
+
+  const { isHelpOpen, setIsHelpOpen } = useKeyboardShortcuts({
+    enabled: true,
+    shortcuts,
+  });
+
   if (!currentStack) {
     return (
       <div className="workflow-builder-empty">
@@ -430,22 +594,26 @@ const WorkflowBuilderContent = () => {
         <div className="header-right">
           <Tooltip content="Browse workflow templates">
             <button className="btn-icon" onClick={() => setIsTemplateModalOpen(true)}>
-              📋 Templates
+              <span>📋</span>
+              <span className="btn-text">Templates</span>
             </button>
           </Tooltip>
           <Tooltip content="Import workflow from JSON">
             <button className="btn-icon" onClick={handleImportJSON}>
-              📥 Import
+              <span>📥</span>
+              <span className="btn-text">Import</span>
             </button>
           </Tooltip>
           <Tooltip content="Export current workflow as JSON">
             <button className="btn-icon" onClick={handleExportJSON}>
-              📤 Export
+              <span>📤</span>
+              <span className="btn-text">Export</span>
             </button>
           </Tooltip>
           <Tooltip content="Manage API Keys for all providers">
             <button className="btn-icon" onClick={() => setIsApiKeyManagerOpen(true)}>
-              🔑 Keys
+              <span>🔑</span>
+              <span className="btn-text">Keys</span>
             </button>
           </Tooltip>
           <Tooltip content="View execution logs and progress">
@@ -453,11 +621,18 @@ const WorkflowBuilderContent = () => {
               className={`btn-icon ${showExecutionPanel ? 'active' : ''}`}
               onClick={() => setShowExecutionPanel(!showExecutionPanel)}
             >
-              ⚡ Logs
+              <span>⚡</span>
+              <span className="btn-text">Logs</span>
+            </button>
+          </Tooltip>
+          <Tooltip content="Keyboard shortcuts (Press ?)">
+            <button className="btn-icon" onClick={() => setIsHelpOpen(true)}>
+              <span>⌨️</span>
             </button>
           </Tooltip>
           <button className="btn-save" onClick={handleSave}>
-            💾 Save
+            <span>💾</span>
+            <span className="btn-text">Save</span>
           </button>
           <ThemeToggle />
           <UserMenu />
@@ -465,9 +640,19 @@ const WorkflowBuilderContent = () => {
       </header>
 
       <div className="workflow-content">
+        {/* Mobile Sidebar Overlay */}
+        {isMobile && (
+          <div 
+            className={`sidebar-overlay ${isMobileSidebarOpen ? 'visible' : ''}`}
+            onClick={handleOverlayClick}
+          />
+        )}
+
         {/* Enhanced Component Library Sidebar */}
-        <aside className={`component-library-new ${isComponentLibraryCollapsed ? 'collapsed' : ''}`}>
-          {isComponentLibraryCollapsed ? (
+        <aside 
+          className={`component-library-new ${isComponentLibraryCollapsed ? 'collapsed' : ''} ${isMobileSidebarOpen ? 'mobile-open' : ''}`}
+        >
+          {isComponentLibraryCollapsed && !isMobile ? (
             <button
               className="collapse-toggle-btn"
               onClick={() => setIsComponentLibraryCollapsed(false)}
@@ -487,16 +672,25 @@ const WorkflowBuilderContent = () => {
                 </div>
                 <button
                   className="collapse-btn"
-                  onClick={() => setIsComponentLibraryCollapsed(true)}
+                  onClick={() => {
+                    if (isMobile) {
+                      setIsMobileSidebarOpen(false);
+                    } else {
+                      setIsComponentLibraryCollapsed(true);
+                    }
+                  }}
                   title="Collapse"
                 >
-                  ◀
+                  {isMobile ? "✕" : "◀"}
                 </button>
               </div>
 
               {/* Chat Button */}
               <div className="chat-section">
-                <button className="chat-with-ai-btn" onClick={toggleChat}>
+                <button className="chat-with-ai-btn" onClick={() => {
+                  toggleChat();
+                  if (isMobile) setIsMobileSidebarOpen(false);
+                }}>
                   <span className="chat-icon">💬</span>
                   <span>Chat With AI</span>
                 </button>
@@ -653,6 +847,7 @@ const WorkflowBuilderContent = () => {
               }}
               maskColor="rgba(0,0,0,0.1)"
               style={{ background: "#F5F5F5" }}
+              className="workflow-minimap"
             />
           </ReactFlow>
 
@@ -663,23 +858,35 @@ const WorkflowBuilderContent = () => {
               <button className="btn-import-template" onClick={() => setIsTemplateModalOpen(true)}>
                 Or import a template
               </button>
+              <p className="shortcut-hint">Press <kbd>?</kbd> for keyboard shortcuts</p>
             </div>
           )}
 
           {/* Zoom Controls */}
           <div className="zoom-controls">
-            <button className="zoom-btn" onClick={handleZoomIn} title="Zoom In">+</button>
-            <button className="zoom-btn" onClick={handleZoomOut} title="Zoom Out">−</button>
-            <button className="zoom-btn" onClick={handleFitView} title="Fit View">⛶</button>
+            <button className="zoom-btn" onClick={handleZoomIn} title="Zoom In (Ctrl+=)">+</button>
+            <button className="zoom-btn" onClick={handleZoomOut} title="Zoom Out (Ctrl+-)">−</button>
+            <button className="zoom-btn" onClick={handleFitView} title="Fit View (Ctrl+0)">⛶</button>
             <div className="zoom-level-dropdown">
               <span>{zoom}%</span>
               <span className="dropdown-arrow">▼</span>
             </div>
           </div>
 
+          {/* Mobile Sidebar Toggle Button */}
+          {isMobile && !isMobileSidebarOpen && (
+            <button 
+              className="mobile-sidebar-toggle"
+              onClick={toggleMobileSidebar}
+              title="Open Components"
+            >
+              🧩
+            </button>
+          )}
+
           {/* Floating Actions */}
           <div className="floating-actions">
-            <button className="fab fab-chat" onClick={toggleChat} title="Chat with Stack">
+            <button className="fab fab-chat" onClick={toggleChat} title="Chat with Stack (Ctrl+/)">
               💬
             </button>
             <div className="build-stack-container">
@@ -689,7 +896,7 @@ const WorkflowBuilderContent = () => {
               <button
                 className={`fab fab-run ${isExecuting ? 'executing' : ''}`}
                 onClick={handleBuildStack}
-                title={isExecuting ? "Cancel Execution" : "Build Stack"}
+                title={isExecuting ? "Cancel Execution" : "Build Stack (Ctrl+Enter)"}
               >
                 {isExecuting ? "⏹" : "▶"}
               </button>
@@ -714,34 +921,41 @@ const WorkflowBuilderContent = () => {
         />
       )}
 
-{isTemplateModalOpen && (
-  <TemplateModal
-    isOpen={isTemplateModalOpen}
-    onClose={() => setIsTemplateModalOpen(false)}
-    onLoadTemplate={(nodes, edges) => {
-      // Add onUpdate handlers to nodes
-      const nodesWithHandlers = nodes.map((node: any) => ({
-        ...node,
-        data: {
-          ...node.data,
-          onUpdate: (updates: any) => {
-            setNodes((nds) =>
-              nds.map((n) =>
-                n.id === node.id ? { ...n, data: { ...n.data, ...updates } } : n
-              )
-            );
-          },
-        },
-      }));
-      setNodes(nodesWithHandlers);
-      setEdges(edges);
-    }}
-  />
-)}
+      {isTemplateModalOpen && (
+        <TemplateModal
+          isOpen={isTemplateModalOpen}
+          onClose={() => setIsTemplateModalOpen(false)}
+          onLoadTemplate={(nodes, edges) => {
+            // Add onUpdate handlers to nodes
+            const nodesWithHandlers = nodes.map((node: any) => ({
+              ...node,
+              data: {
+                ...node.data,
+                onUpdate: (updates: any) => {
+                  setNodes((nds) =>
+                    nds.map((n) =>
+                      n.id === node.id ? { ...n, data: { ...n.data, ...updates } } : n
+                    )
+                  );
+                },
+              },
+            }));
+            setNodes(nodesWithHandlers);
+            setEdges(edges);
+          }}
+        />
+      )}
 
       {isApiKeyManagerOpen && (
         <ApiKeyManager onClose={() => setIsApiKeyManagerOpen(false)} />
       )}
+
+      {/* Keyboard Shortcuts Modal */}
+      <KeyboardShortcutsModal
+        isOpen={isHelpOpen}
+        onClose={() => setIsHelpOpen(false)}
+        shortcuts={shortcuts}
+      />
     </div>
   );
 };

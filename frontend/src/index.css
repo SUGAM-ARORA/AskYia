@@ -1,9 +1,16 @@
+/* frontend/src/index.css */
+
 /* Import design system */
 @import './styles/design-tokens.css';
 @import './styles/themes/light.css';
 @import './styles/themes/dark.css';
 
-* { 
+/* Import new utility styles */
+@import './styles/Glassmorphism.css';
+@import './styles/Animations.css';
+@import './styles/Responsive.css';
+
+* {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -17,11 +24,14 @@ body {
   font-size: var(--font-size-sm);
   line-height: var(--line-height-normal);
   transition: background-color var(--transition-normal), color var(--transition-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 a {
   color: var(--text-link);
   text-decoration: none;
+  transition: color var(--transition-fast);
 }
 
 a:hover {
@@ -33,6 +43,12 @@ button {
   cursor: pointer;
   border: none;
   outline: none;
+  transition: all var(--transition-normal);
+}
+
+button:focus-visible {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 2px;
 }
 
 input, textarea, select {
@@ -42,6 +58,7 @@ input, textarea, select {
   border: 1px solid var(--input-border);
   color: var(--input-text);
   border-radius: var(--radius-md);
+  transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
 }
 
 input::placeholder, textarea::placeholder {
@@ -67,10 +84,17 @@ input:focus, textarea:focus, select:focus {
 ::-webkit-scrollbar-thumb {
   background: var(--scrollbar-thumb);
   border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--scrollbar-thumb-hover);
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
 
 /* Selection color */
@@ -82,4 +106,56 @@ input:focus, textarea:focus, select:focus {
 [data-theme="dark"] ::selection {
   background: var(--brand-primary-dark);
   color: #FFFFFF;
+}
+
+/* Focus visible for accessibility */
+:focus-visible {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 2px;
+}
+
+/* Remove default focus outline */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Prevent text selection on drag */
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Print styles */
+@media print {
+  body {
+    background: white;
+    color: black;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
 }

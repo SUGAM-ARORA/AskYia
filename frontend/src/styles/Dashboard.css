@@ -357,3 +357,148 @@
 .stack-card-action.secondary:hover {
   background: var(--btn-secondary-hover);
 }
+
+/* ========== Enhanced User Menu ========== */
+.user-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.user-dropdown-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.user-dropdown-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--brand-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 16px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.user-dropdown-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.user-dropdown-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.user-dropdown-divider {
+  height: 1px;
+  background: var(--border-default);
+  margin: 4px 0;
+}
+
+.dropdown-icon {
+  font-size: 16px;
+  width: 24px;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .dashboard-header {
+    padding: 12px 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .header-left {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .header-right {
+    gap: 8px;
+  }
+
+  .dashboard-main {
+    padding: 20px 16px;
+  }
+
+  .dashboard-controls {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  .dashboard-title {
+    font-size: 20px;
+  }
+
+  .btn-new-stack {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .stack-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .stack-card {
+    padding: 20px;
+  }
+
+  .empty-card {
+    padding: 32px 24px;
+  }
+
+  .empty-card h3 {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-header {
+    padding: 10px 12px;
+  }
+
+  .dashboard-main {
+    padding: 16px 12px;
+  }
+
+  .stack-card-title {
+    font-size: 16px;
+  }
+
+  .stack-card-description {
+    font-size: 13px;
+    min-height: auto;
+  }
+
+  .stack-card-actions {
+    flex-direction: column;
+  }
+
+  .stack-card-action {
+    width: 100%;
+  }
+
+  .user-button {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+  }
+
+  .user-dropdown {
+    right: -8px;
+    min-width: 180px;
+  }
+}

@@ -1,5 +1,7 @@
+# backend/app/schemas/user.py
 from pydantic import BaseModel, EmailStr
 from typing import Optional
+from datetime import datetime
 
 
 class UserBase(BaseModel):
@@ -18,6 +20,8 @@ class UserLogin(BaseModel):
 
 class UserOut(UserBase):
     id: int
+    created_at: Optional[datetime] = None
 
     class Config:
+        from_attributes = True
         orm_mode = True
