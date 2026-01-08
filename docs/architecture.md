@@ -50,6 +50,48 @@ Askyia is a full-stack no-code platform for composing intelligent workflows usin
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
+Logging Architechture 
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                           OBSERVABILITY ARCHITECTURE                             │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                  │
+│  ┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐   │
+│  │   Frontend  │     │   Backend   │     │  ChromaDB   │     │  PostgreSQL │   │
+│  │   (React)   │     │  (FastAPI)  │     │             │     │             │   │
+│  └──────┬──────┘     └──────┬──────┘     └──────┬──────┘     └──────┬──────┘   │
+│         │                   │                   │                   │          │
+│         │                   │ Logs (JSON)       │                   │          │
+│         │                   ▼                   │                   │          │
+│         │           ┌───────────────┐           │                   │          │
+│         │           │   Logstash    │◄──────────┴───────────────────┘          │
+│         │           │  (Collector)  │                                          │
+│         │           └───────┬───────┘                                          │
+│         │                   │                                                   │
+│         │                   ▼                                                   │
+│         │           ┌───────────────┐         ┌───────────────┐                │
+│         │           │ Elasticsearch │────────►│    Kibana     │                │
+│         │           │   (Storage)   │         │ (Visualization)│                │
+│         │           └───────────────┘         └───────────────┘                │
+│         │                                                                       │
+│         │  Metrics (Prometheus format)                                          │
+│         │                   │                                                   │
+│         ▼                   ▼                                                   │
+│  ┌─────────────────────────────────────┐     ┌───────────────┐                │
+│  │            Prometheus               │────►│    Grafana    │                │
+│  │         (Metrics Store)             │     │  (Dashboards) │                │
+│  └─────────────────────────────────────┘     └───────────────┘                │
+│                                                                                  │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+LOGGING (ELK Stack):                    MONITORING (Prometheus Stack):
+─────────────────────                   ──────────────────────────────
+• Application logs                      • Request latency
+• Error tracking                        • Request count
+• Request tracing                       • CPU/Memory usage
+• Debug information                     • LLM API response times
+• Audit trail                           • Vector DB query times
+
 ## Core Components
 
 ### 1. User Query Component

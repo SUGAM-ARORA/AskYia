@@ -114,6 +114,80 @@ export const WORKFLOW_TEMPLATES: WorkflowTemplate[] = [
     ],
   },
   {
+  id: 'rag-document-qa',
+  name: 'RAG Document Q&A',
+  description: 'Ask questions about your uploaded documents using Retrieval Augmented Generation. Upload documents first, then query them with natural language.',
+  category: 'ai',
+  icon: '📚',
+  tags: ['rag', 'documents', 'qa', 'knowledge-base', 'retrieval'],
+  difficulty: 'beginner',
+  estimatedTime: '2 min setup',
+  author: 'AskYia Team',
+  featured: true,
+  nodes: [
+    {
+      id: 'input-query',
+      type: 'input',
+      position: { x: 100, y: 200 },
+      data: { 
+        label: 'User Query', 
+        inputType: 'text', 
+        defaultValue: '', 
+        required: true,
+        placeholder: 'Ask a question about your documents...'
+      },
+    },
+    {
+      id: 'knowledge-base',
+      type: 'knowledgeBase',
+      position: { x: 400, y: 200 },
+      data: {
+        label: 'Knowledge Base',
+        topK: 3,
+        threshold: 0.7,
+        includeMetadata: true,
+        searchType: 'similarity',
+      },
+    },
+    {
+      id: 'llm-answer',
+      type: 'llm',
+      position: { x: 700, y: 200 },
+      data: {
+        label: 'Answer Generator',
+        provider: 'google',
+        model: 'gemini-2.5-flash-preview-05-20',
+        systemPrompt: `You are a helpful assistant that answers questions based on the provided context from documents.
+
+Instructions:
+- Only answer based on the context provided
+- If the context doesn't contain enough information, say so
+- Quote relevant parts of the context when appropriate
+- Be concise but thorough`,
+        temperature: 0.3,
+        maxTokens: 2048,
+        useGlobalApiKey: true,
+      },
+    },
+    {
+      id: 'output-answer',
+      type: 'output',
+      position: { x: 1000, y: 200 },
+      data: { 
+        label: 'Answer', 
+        outputType: 'display', 
+        format: 'markdown' 
+      },
+    },
+  ],
+  edges: [
+    { id: 'e1', source: 'input-query', target: 'knowledge-base', sourceHandle: 'output', targetHandle: 'query' },
+    { id: 'e2', source: 'knowledge-base', target: 'llm-answer', sourceHandle: 'context', targetHandle: 'context' },
+    { id: 'e3', source: 'input-query', target: 'llm-answer', sourceHandle: 'output', targetHandle: 'query' },
+    { id: 'e4', source: 'llm-answer', target: 'output-answer', sourceHandle: 'output', targetHandle: 'input' },
+  ],
+},
+  {
     id: 'intelligent-chatbot',
     name: 'Intelligent Chatbot',
     description: 'Build a context-aware chatbot with memory, sentiment analysis, and intelligent responses.',

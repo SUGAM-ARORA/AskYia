@@ -22,7 +22,7 @@ export const useWorkflowExecution = () => {
     isExecuting,
     currentExecution,
     setFinalOutput,
-    clearOutput, // ✅ Add this
+    clearOutput,
   } = useExecutionStore();
 
   const { getApiKey } = useApiKeysStore();
@@ -70,7 +70,7 @@ export const useWorkflowExecution = () => {
   // Build workflow definition from nodes and edges
   const buildWorkflowDefinition = useCallback((nodes: Node[], edges: Edge[]) => {
     const executionOrder = getExecutionOrder(nodes, edges);
-    
+
     const llmNodes = nodes.filter(n => n.type === 'llm' || n.type === 'llmEngine');
 
     return {
@@ -93,21 +93,50 @@ export const useWorkflowExecution = () => {
     };
   }, [getExecutionOrder]);
 
-  // Extract query from input node
+  // Extract query from input node - handles multiple node types
   const getQueryFromNodes = useCallback((nodes: Node[]): string => {
-    const inputNode = nodes.find(n => 
-      n.type === 'input' || 
+    // Look for various input node types
+    const inputNode = nodes.find(n =>
+      n.type === 'input' ||
       n.type === 'userQuery' ||
-      n.data?.nodeType === 'user_query'
+      n.type === 'user_query' ||
+      n.type === 'UserQuery' ||
+      n.data?.nodeType === 'user_query' ||
+      n.data?.label?.toLowerCase().includes('query') ||
+      n.data?.label?.toLowerCase().includes('input')
     );
-    return inputNode?.data?.query || inputNode?.data?.userQuery || '';
+
+    if (!inputNode) {
+      console.warn('No input node found in workflow');
+      return '';
+    }
+
+    // Try multiple possible field names for the query
+    const query = 
+      inputNode.data?.query || 
+      inputNode.data?.userQuery || 
+      inputNode.data?.value ||
+      inputNode.data?.input ||
+      inputNode.data?.defaultValue ||
+      inputNode.data?.text ||
+      '';
+
+    console.log('Extracted query from node:', { 
+      nodeId: inputNode.id,
+      nodeType: inputNode.type, 
+      nodeLabel: inputNode.data?.label,
+      query: query?.substring(0, 50) + (query?.length > 50 ? '...' : '')
+    });
+
+    return query;
   }, []);
 
   // Extract prompt/system prompt from LLM nodes
   const getPromptFromNodes = useCallback((nodes: Node[]): string | undefined => {
-    const llmNode = nodes.find(n => 
-      n.type === 'llm' || 
-      n.type === 'llmEngine'
+    const llmNode = nodes.find(n =>
+      n.type === 'llm' ||
+      n.type === 'llmEngine' ||
+      n.type === 'llm_engine'
     );
     return llmNode?.data?.systemPrompt || llmNode?.data?.prompt;
   }, []);
@@ -124,7 +153,7 @@ export const useWorkflowExecution = () => {
       return;
     }
 
-    // ✅ CRITICAL: Clear previous output before starting new execution
+    // Clear previous output before starting new execution
     clearOutput();
 
     abortControllerRef.current = new AbortController();
@@ -139,7 +168,8 @@ export const useWorkflowExecution = () => {
     try {
       const definition = buildWorkflowDefinition(nodes, edges);
       const executionOrder = getExecutionOrder(nodes, edges);
-      
+
+      // Get query from parameter first, then try to extract from nodes
       const actualQuery = query || getQueryFromNodes(nodes);
       const prompt = getPromptFromNodes(nodes);
 
@@ -148,7 +178,20 @@ export const useWorkflowExecution = () => {
       }
 
       addLog({ level: 'debug', message: `Execution order: ${executionOrder.join(' → ')}` });
+      addLog({ level: 'info', message: `Query being sent: "${actualQuery.substring(0, 100)}${actualQuery.length > 100 ? '...' : ''}"` });
       addLog({ level: 'info', message: `Sending to backend API...` });
+
+      // Log Knowledge Base status
+      const kbNode = nodes.find(n => n.type === 'knowledgeBase' || n.type === 'knowledge_base');
+      if (kbNode) {
+        const kbEnabled = kbNode.data?.enabled !== false;
+        const topK = kbNode.data?.topK || 3;
+        const threshold = kbNode.data?.threshold || 0.7;
+        addLog({ 
+          level: 'debug', 
+          message: `Knowledge Base: enabled=${kbEnabled}, topK=${topK}, threshold=${(threshold * 100).toFixed(0)}%` 
+        });
+      }
 
       // Animate nodes while waiting for backend
       const animationPromise = (async () => {
@@ -158,16 +201,22 @@ export const useWorkflowExecution = () => {
           if (!node) continue;
 
           options?.onNodeStart?.(nodeId);
-          
+
           const incomingEdges = edges.filter(e => e.target === nodeId);
           for (const edge of incomingEdges) {
             updateEdgeStatus(edge.id, 'active');
           }
-          
-          updateNodeStatus(nodeId, 'running');
-          addLog({ level: 'info', message: `Executing: ${node.type || node.data?.label}`, nodeId });
 
-          const delay = node.type === 'llm' || node.type === 'llmEngine' ? 2000 : 500;
+          updateNodeStatus(nodeId, 'running');
+          addLog({ level: 'info', message: `Executing: ${node.data?.label || node.type}`, nodeId });
+
+          // Different delays based on node type
+          let delay = 500;
+          if (node.type === 'llm' || node.type === 'llmEngine') {
+            delay = 2000;
+          } else if (node.type === 'knowledgeBase' || node.type === 'knowledge_base') {
+            delay = 1000;
+          }
           await new Promise(r => setTimeout(r, delay));
         }
       })();
@@ -186,7 +235,15 @@ export const useWorkflowExecution = () => {
       ]);
 
       addLog({ level: 'info', message: `Backend response received` });
-      addLog({ level: 'debug', message: `Result: ${JSON.stringify(backendResult).slice(0, 200)}...` });
+      
+      // Log execution metadata if available
+      if (backendResult?._execution) {
+        const exec = backendResult._execution;
+        addLog({ 
+          level: 'debug', 
+          message: `Execution completed in ${exec.duration_seconds}s, KB used: ${exec.kb_used}, context length: ${exec.context_length}` 
+        });
+      }
 
       // Mark all nodes as complete
       for (const nodeId of executionOrder) {
@@ -194,32 +251,32 @@ export const useWorkflowExecution = () => {
         for (const edge of incomingEdges) {
           updateEdgeStatus(edge.id, 'completed');
         }
-        
-        updateNodeStatus(nodeId, 'success', { 
-          output: nodeId === executionOrder[executionOrder.length - 1] 
-            ? backendResult 
+
+        updateNodeStatus(nodeId, 'success', {
+          output: nodeId === executionOrder[executionOrder.length - 1]
+            ? backendResult
             : { processed: true }
         });
         options?.onNodeComplete?.(nodeId, backendResult);
       }
 
       // Extract and store final output
-      const finalAnswer = backendResult?.answer || 
-                          backendResult?.result?.answer || 
+      const finalAnswer = backendResult?.answer ||
+                          backendResult?.result?.answer ||
                           backendResult?.output ||
-                          JSON.stringify(backendResult);
+                          (typeof backendResult === 'string' ? backendResult : JSON.stringify(backendResult));
 
       setFinalOutput(finalAnswer);
       completeExecution({ answer: finalAnswer, raw: backendResult });
       addLog({ level: 'info', message: 'Workflow execution completed successfully' });
-      
+
       options?.onComplete?.({ answer: finalAnswer, raw: backendResult });
 
       return { answer: finalAnswer, raw: backendResult };
 
     } catch (error: any) {
       const errorMessage = error.message || 'Unknown error occurred';
-      
+
       const executionOrder = getExecutionOrder(nodes, edges);
       for (const nodeId of executionOrder) {
         const state = useExecutionStore.getState();
@@ -231,7 +288,7 @@ export const useWorkflowExecution = () => {
       completeExecution(undefined, errorMessage);
       addLog({ level: 'error', message: `Workflow execution failed: ${errorMessage}` });
       options?.onError?.(errorMessage);
-      
+
       return { error: errorMessage };
     }
   }, [

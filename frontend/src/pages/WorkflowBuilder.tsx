@@ -1,4 +1,3 @@
-// frontend/src/pages/WorkflowBuilder.tsx
 import { useCallback, useRef, useState, useEffect } from "react";
 import { useKeyboardShortcuts } from "../hooks/useKeyboardShortcuts";
 import KeyboardShortcutsModal from "../components/common/KeyboardShortcutsModal";
@@ -33,6 +32,7 @@ import APINode from "../components/nodes/APINode";
 import MemoryNode from "../components/nodes/MemoryNode";
 import ValidatorNode from "../components/nodes/ValidatorNode";
 import TransformNode from "../components/nodes/TransformNode";
+import DocumentManager from "../components/common/DocumentManager";
 
 // Import GenericNode for new node types
 import GenericNode from "../components/nodes/GenericNode";
@@ -140,6 +140,7 @@ const WorkflowBuilderContent = () => {
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
   const [zoom, setZoom] = useState(100);
+  const [isDocManagerOpen, setIsDocManagerOpen] = useState(false);
   const [snapToGridEnabled, setSnapToGridEnabled] = useState(true);
   
   // Component library state
@@ -468,6 +469,13 @@ const WorkflowBuilderContent = () => {
       action: () => setIsTemplateModalOpen(true),
     },
     {
+      key: "d",
+      ctrl: true,
+      description: "Open document manager",
+      category: "Settings",
+      action: () => setIsDocManagerOpen(true),
+    },
+    {
       key: "e",
       ctrl: true,
       description: "Export workflow",
@@ -596,6 +604,12 @@ const WorkflowBuilderContent = () => {
             <button className="btn-icon" onClick={() => setIsTemplateModalOpen(true)}>
               <span>📋</span>
               <span className="btn-text">Templates</span>
+            </button>
+          </Tooltip>
+          <Tooltip content="Manage RAG documents">
+            <button className="btn-icon" onClick={() => setIsDocManagerOpen(true)}>
+              <span>📚</span>
+              <span className="btn-text">Docs</span>
             </button>
           </Tooltip>
           <Tooltip content="Import workflow from JSON">
@@ -948,6 +962,12 @@ const WorkflowBuilderContent = () => {
 
       {isApiKeyManagerOpen && (
         <ApiKeyManager onClose={() => setIsApiKeyManagerOpen(false)} />
+      )}
+
+      {isDocManagerOpen && (
+        <DocumentManager
+        isOpen={isDocManagerOpen}
+        onClose={() => setIsDocManagerOpen(false)} />
       )}
 
       {/* Keyboard Shortcuts Modal */}

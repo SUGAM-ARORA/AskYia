@@ -126,6 +126,40 @@ export const NODE_DEFINITIONS: NodeDefinition[] = [
     ],
     defaultData: { provider: 'google', model: 'gemini-2.5-flash', temperature: 0.7, maxTokens: 4096, useGlobalApiKey: true },
   },
+{
+  type: 'knowledgeBase',
+  label: 'Knowledge Base',
+  description: 'Retrieve relevant context from uploaded documents using RAG (Retrieval Augmented Generation)',
+  category: 'ai',
+  icon: '📚',
+  color: '#8B5CF6',
+  bgColor: '#F3E8FF',
+  inputs: [
+    { id: 'query', label: 'Query', type: 'string' },
+  ],
+  outputs: [
+    { id: 'context', label: 'Retrieved Context', type: 'string' },
+    { id: 'sources', label: 'Sources', type: 'array' },
+    { id: 'scores', label: 'Relevance Scores', type: 'array' },
+  ],
+  configFields: [
+    { name: 'topK', label: 'Top K Results', type: 'number', default: 3, min: 1, max: 10 },
+    { name: 'threshold', label: 'Similarity Threshold', type: 'slider', min: 0, max: 1, step: 0.05, default: 0.7 },
+    { name: 'includeMetadata', label: 'Include Source Metadata', type: 'boolean', default: true },
+    {
+      name: 'searchType',
+      label: 'Search Type',
+      type: 'select',
+      options: [
+        { value: 'similarity', label: 'Similarity Search' },
+        { value: 'mmr', label: 'MMR (Max Marginal Relevance)' },
+        { value: 'hybrid', label: 'Hybrid Search' },
+      ],
+      default: 'similarity',
+    },
+  ],
+  defaultData: { topK: 3, threshold: 0.7, includeMetadata: true, searchType: 'similarity' },
+},
   {
     type: 'llmChat',
     label: 'LLM Chat',
@@ -1900,6 +1934,23 @@ export const getAllCategories = (): NodeCategory[] => {
   return Object.keys(NODE_CATEGORIES) as NodeCategory[];
 };
 
+// export const knowledgeBaseNode = {
+//   id: 'knowledgeBase',
+//   type: 'knowledgeBase',
+//   category: 'Data',
+//   label: 'Knowledge Base',
+//   description: 'Retrieve context from uploaded documents using RAG',
+//   icon: '📚',
+//   color: '#8b5cf6',
+//   inputs: ['query'],
+//   outputs: ['context'],
+//   defaultData: {
+//     topK: 3,
+//     threshold: 0.7,
+//     enabled: true
+//   }
+// };
+
 export const searchNodes = (query: string): NodeDefinition[] => {
   const lowerQuery = query.toLowerCase();
   return NODE_DEFINITIONS.filter(node =>
@@ -1913,6 +1964,8 @@ export const searchNodes = (query: string): NodeDefinition[] => {
 export const getNodeCount = (): number => {
   return NODE_DEFINITIONS.length;
 };
+
+
 
 export const getNodeCountByCategory = (): Record<NodeCategory, number> => {
   const counts: Record<NodeCategory, number> = {
