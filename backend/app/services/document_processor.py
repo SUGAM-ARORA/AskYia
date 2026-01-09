@@ -289,8 +289,8 @@ class DocumentProcessor:
                 import fitz
                 doc = fitz.open(stream=file_bytes, filetype="pdf")
                 info["pages"] = len(doc)
-                info["title"] = doc.metadata.get("title", "")
-                info["author"] = doc.metadata.get("author", "")
+                info["title"] = doc.message_metadata.get("title", "")
+                info["author"] = doc.message_metadata.get("author", "")
                 doc.close()
             except:
                 pass

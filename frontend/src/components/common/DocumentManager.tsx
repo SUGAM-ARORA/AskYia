@@ -281,7 +281,7 @@ const DocumentManager = ({ isOpen, onClose }: DocumentManagerProps) => {
                           {(result.score * 100).toFixed(1)}% match
                         </span>
                         <span className="result-source">
-                          {result.metadata?.filename || 'Unknown'}
+                          {result.message_metadata?.filename || 'Unknown'}
                         </span>
                       </div>
                       <p className="result-text">

@@ -104,10 +104,10 @@ const logViewer: React.FC<LogViewerProps> = ({
                 </span>
               )}
               <span className="log-message">{log.message}</span>
-              {log.metadata && Object.keys(log.metadata).length > 0 && (
+              {log.message_metadata && Object.keys(log.message_metadata).length > 0 && (
                 <details className="log-metadata">
                   <summary>Details</summary>
-                  <pre>{JSON.stringify(log.metadata, null, 2)}</pre>
+                  <pre>{JSON.stringify(log.message_metadata, null, 2)}</pre>
                 </details>
               )}
             </div>

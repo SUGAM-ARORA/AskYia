@@ -60,7 +60,7 @@ async def stream_execution_logs(execution_id: str):
     async def event_generator():
         try:
             async for log_entry in execution_log_service.subscribe(execution_id):
-                if log_entry.metadata.get('type') == 'heartbeat':
+                if log_entry.message_metadata.get('type') == 'heartbeat':
                     yield {
                         "event": "heartbeat",
                         "data": json.dumps({"timestamp": log_entry.timestamp})

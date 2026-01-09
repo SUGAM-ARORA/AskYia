@@ -1307,7 +1307,7 @@ class WorkflowExecutor:
                         'node_id': node_id,
                         'node_type': node_type,
                         'status': 'completed',
-                        'metadata': result.metadata
+                        'metadata': result.message_metadata
                     })
                 else:
                     context.node_statuses[node_id] = NodeStatus.FAILED

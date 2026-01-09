@@ -10,7 +10,7 @@ settings = get_settings()
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-target_metadata = Base.metadata
+target_metadata = Base.message_metadata
 config.set_main_option("sqlalchemy.url", str(settings.database_url))
 
 

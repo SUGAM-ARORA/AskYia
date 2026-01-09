@@ -1,19 +1,24 @@
-from typing import Optional
 from pydantic import BaseModel
+from typing import Optional, Dict, Any
+from datetime import datetime
 
 
-class DocumentBase(BaseModel):
-    filename: str
-    path: str
-
-
-class DocumentCreate(DocumentBase):
-    pass
-
-
-class DocumentOut(DocumentBase):
+class DocumentOut(BaseModel):
     id: int
-    owner_id: Optional[int]
+    uuid: str
+    filename: str
+    original_filename: str
+    file_type: Optional[str]
+    file_size: Optional[int]
+    chunk_count: int
+    processing_status: str
+    created_at: datetime
+    processed_at: Optional[datetime]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
+
+class DocumentListOut(BaseModel):
+    documents: list[DocumentOut]
+    total: int

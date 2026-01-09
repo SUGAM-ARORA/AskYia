@@ -1,21 +1,26 @@
-# backend/app/api/deps.py
-from typing import Optional
+from typing import Optional, Generator
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from app.db.session import get_db
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.db.session import AsyncSessionLocal
 from app.core.security import decode_access_token
+from app.repositories.user import UserRepository
 
 security = HTTPBearer(auto_error=False)
+user_repo = UserRepository()
 
 
-def get_session(db=Depends(get_db)):
-    return db
+async def get_session() -> Generator[AsyncSession, None, None]:
+    async with AsyncSessionLocal() as session:
+        yield session
 
 
 async def get_current_user(
-    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security)
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
+    db: AsyncSession = Depends(get_session)
 ) -> dict:
-    """Get current authenticated user from JWT token."""
+    """Get current authenticated user."""
     if not credentials:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -23,9 +28,7 @@ async def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    token = credentials.credentials
-    payload = decode_access_token(token)
-    
+    payload = decode_access_token(credentials.credentials)
     if not payload:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -34,3 +37,27 @@ async def get_current_user(
         )
     
     return payload
+
+
+async def get_current_user_optional(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
+) -> Optional[dict]:
+    """Get current user if authenticated, None otherwise."""
+    if not credentials:
+        return None
+    
+    payload = decode_access_token(credentials.credentials)
+    return payload
+
+
+async def get_current_active_user(
+    current_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session)
+):
+    """Get current active user from database."""
+    user = await user_repo.get(db, int(current_user["sub"]))
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if not user.is_active:
+        raise HTTPException(status_code=400, detail="Inactive user")
+    return user
