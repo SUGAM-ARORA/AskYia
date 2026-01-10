@@ -1,4 +1,17 @@
 apiVersion: v2
-name: workflow-builder
+name: askyia
+description: Helm chart for Askyia - No-Code/Low-Code Workflow Builder
+type: application
 version: 0.1.0
-description: Helm chart for Workflow Builder stack
+appVersion: "1.0.0"
+keywords:
+  - workflow
+  - low-code
+  - no-code
+  - ai
+  - llm
+maintainers:
+  - name: Askyia Team
+home: https://github.com/SUGAM-ARORA/askyia
+sources:
+  - https://github.com/SUGAM-ARORA/askyia

@@ -2,9 +2,15 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: filebeat-config
-  namespace: workflow-builder
+  namespace: logging
+  labels:
+    app: filebeat
+    app.kubernetes.io/name: filebeat
+    app.kubernetes.io/part-of: askyia
 data:
   filebeat.yml: |
+    # Filebeat configuration for Kubernetes
+    
     filebeat.inputs:
       # Container logs
       - type: container
@@ -34,38 +40,72 @@ data:
             type: container
             paths:
               - /var/log/containers/*${data.kubernetes.container.id}.log
+          templates:
+            # Askyia backend specific config
+            - condition:
+                contains:
+                  kubernetes.labels.app: "backend"
+              config:
+                - type: container
+                  paths:
+                    - /var/log/containers/*${data.kubernetes.container.id}.log
+                  processors:
+                    - decode_json_fields:
+                        fields: ["message"]
+                        target: ""
+                        overwrite_keys: true
 
+    # Processors
     processors:
       - add_cloud_metadata: ~
       - add_host_metadata: ~
       - add_kubernetes_metadata:
           host: ${NODE_NAME}
+          default_indexers.enabled: true
+          default_matchers.enabled: true
+      - drop_fields:
+          fields: ["agent.ephemeral_id", "agent.id", "agent.name", "agent.type", "agent.version", "ecs.version"]
+          ignore_missing: true
 
     # Output to Logstash
     output.logstash:
-      hosts: ["logstash:5044"]
+      hosts: ["logstash.logging.svc.cluster.local:5044"]
       loadbalance: true
+      bulk_max_size: 2048
 
-    # Logging
+    # Logging configuration
     logging.level: info
     logging.to_files: true
     logging.files:
       path: /var/log/filebeat
       name: filebeat
       keepfiles: 7
+      permissions: 0640
 
+    # Monitoring (send to Elasticsearch)
+    monitoring:
+      enabled: true
+      elasticsearch:
+        hosts: ["http://elasticsearch.logging.svc.cluster.local:9200"]
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: filebeat
-  namespace: workflow-builder
-
+  namespace: logging
+  labels:
+    app: filebeat
+    app.kubernetes.io/name: filebeat
+    app.kubernetes.io/part-of: askyia
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: filebeat
+  labels:
+    app: filebeat
+    app.kubernetes.io/name: filebeat
+    app.kubernetes.io/part-of: askyia
 rules:
   - apiGroups: [""]
     resources:
@@ -80,29 +120,38 @@ rules:
       - statefulsets
       - daemonsets
     verbs: ["get", "list", "watch"]
-
+  - apiGroups: ["batch"]
+    resources:
+      - jobs
+      - cronjobs
+    verbs: ["get", "list", "watch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: filebeat
+  labels:
+    app: filebeat
+    app.kubernetes.io/name: filebeat
+    app.kubernetes.io/part-of: askyia
 subjects:
   - kind: ServiceAccount
     name: filebeat
-    namespace: workflow-builder
+    namespace: logging
 roleRef:
   kind: ClusterRole
   name: filebeat
   apiGroup: rbac.authorization.k8s.io
-
 ---
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: filebeat
-  namespace: workflow-builder
+  namespace: logging
   labels:
     app: filebeat
+    app.kubernetes.io/name: filebeat
+    app.kubernetes.io/part-of: askyia
 spec:
   selector:
     matchLabels:
@@ -128,6 +177,10 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
+            - name: ELASTICSEARCH_HOST
+              value: "http://elasticsearch.logging.svc.cluster.local:9200"
+            - name: LOGSTASH_HOST
+              value: "logstash.logging.svc.cluster.local:5044"
           securityContext:
             runAsUser: 0
             privileged: true
@@ -137,7 +190,7 @@ spec:
               cpu: "50m"
             limits:
               memory: "200Mi"
-              cpu: "100m"
+              cpu: "200m"
           volumeMounts:
             - name: config
               mountPath: /etc/filebeat/filebeat.yml
@@ -151,10 +204,32 @@ spec:
             - name: varlibdockercontainers
               mountPath: /var/lib/docker/containers
               readOnly: true
+            - name: containerruntime
+              mountPath: /run/containerd/containerd.sock
+              readOnly: true
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - filebeat test config -c /etc/filebeat/filebeat.yml
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 10
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - filebeat test output -c /etc/filebeat/filebeat.yml
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            timeoutSeconds: 15
       volumes:
         - name: config
           configMap:
             name: filebeat-config
+            defaultMode: 0640
         - name: data
           hostPath:
             path: /var/lib/filebeat-data
@@ -165,3 +240,11 @@ spec:
         - name: varlibdockercontainers
           hostPath:
             path: /var/lib/docker/containers
+        - name: containerruntime
+          hostPath:
+            path: /run/containerd/containerd.sock
+      tolerations:
+        - key: node-role.kubernetes.io/master
+          effect: NoSchedule
+        - key: node-role.kubernetes.io/control-plane
+          effect: NoSchedule

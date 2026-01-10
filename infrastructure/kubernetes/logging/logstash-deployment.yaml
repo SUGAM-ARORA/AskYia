@@ -2,43 +2,55 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: logstash-config
-  namespace: workflow-builder
+  namespace: logging
+  labels:
+    app: logstash
+    app.kubernetes.io/name: logstash
+    app.kubernetes.io/part-of: askyia
 data:
   logstash.yml: |
     http.host: "0.0.0.0"
     path.config: /usr/share/logstash/pipeline
     pipeline.workers: 2
     pipeline.batch.size: 125
+    pipeline.batch.delay: 50
     xpack.monitoring.enabled: true
-    xpack.monitoring.elasticsearch.hosts: ["http://elasticsearch:9200"]
+    xpack.monitoring.elasticsearch.hosts: ["http://elasticsearch.logging.svc.cluster.local:9200"]
+    log.level: info
 
   pipelines.yml: |
     - pipeline.id: main
       path.config: "/usr/share/logstash/pipeline/*.conf"
-
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: logstash-pipeline
-  namespace: workflow-builder
+  namespace: logging
+  labels:
+    app: logstash
+    app.kubernetes.io/name: logstash
+    app.kubernetes.io/part-of: askyia
 data:
   askyia.conf: |
     input {
       # Receive logs from Filebeat
       beats {
         port => 5044
+        host => "0.0.0.0"
       }
-      
+
       # Direct TCP input for application logs (JSON)
       tcp {
         port => 5000
+        host => "0.0.0.0"
         codec => json_lines
       }
-      
+
       # HTTP input for webhook-style logging
       http {
         port => 8080
+        host => "0.0.0.0"
         codec => json
       }
     }
@@ -51,7 +63,7 @@ data:
           target => "parsed"
           skip_on_invalid_json => true
         }
-        
+
         if [parsed] {
           mutate {
             rename => {
@@ -64,6 +76,12 @@ data:
               "[parsed][node_id]" => "node_id"
               "[parsed][user_id]" => "user_id"
               "[parsed][message]" => "log_message"
+              "[parsed][logger]" => "logger_name"
+              "[parsed][source]" => "source_info"
+              "[parsed][method]" => "method"
+              "[parsed][path]" => "path"
+              "[parsed][status_code]" => "status_code"
+              "[parsed][duration_ms]" => "duration_ms"
             }
             remove_field => ["parsed"]
           }
@@ -92,8 +110,9 @@ data:
       # Parse timestamp
       if [log_timestamp] {
         date {
-          match => ["log_timestamp", "ISO8601"]
+          match => ["log_timestamp", "ISO8601", "yyyy-MM-dd'T'HH:mm:ss.SSSZ"]
           target => "@timestamp"
+          remove_field => ["log_timestamp"]
         }
       }
 
@@ -102,10 +121,16 @@ data:
         mutate {
           uppercase => ["level"]
         }
-        
+
         if [level] == "ERROR" or [level] == "CRITICAL" {
           mutate {
             add_tag => ["error"]
+          }
+        }
+
+        if [level] == "WARNING" or [level] == "WARN" {
+          mutate {
+            add_tag => ["warning"]
           }
         }
       }
@@ -117,12 +142,35 @@ data:
         }
       }
 
+      # Node execution processing
+      if [node_id] {
+        mutate {
+          add_tag => ["node_execution"]
+        }
+      }
+
+      # HTTP request processing
+      if [method] and [path] and [status_code] {
+        mutate {
+          add_tag => ["http_request"]
+        }
+        
+        # Convert status_code to integer if string
+        mutate {
+          convert => { "status_code" => "integer" }
+        }
+      }
+
       # Extract duration metrics
       if [duration_ms] {
+        mutate {
+          convert => { "duration_ms" => "float" }
+        }
+        
         ruby {
           code => "
             duration = event.get('duration_ms').to_f
-            event.set('duration_bucket', 
+            event.set('duration_bucket',
               case duration
               when 0..100 then 'fast'
               when 100..500 then 'normal'
@@ -130,7 +178,16 @@ data:
               else 'very_slow'
               end
             )
+            event.set('duration_seconds', duration / 1000.0)
           "
+        }
+      }
+
+      # Add geo information if IP is present
+      if [client_ip] {
+        geoip {
+          source => "client_ip"
+          target => "geoip"
         }
       }
     }
@@ -138,36 +195,46 @@ data:
     output {
       # Main index for all logs
       elasticsearch {
-        hosts => ["http://elasticsearch:9200"]
+        hosts => ["http://elasticsearch.logging.svc.cluster.local:9200"]
         index => "askyia-logs-%{+YYYY.MM.dd}"
+        manage_template => true
+        template_name => "askyia-logs"
+        template_overwrite => true
       }
-      
+
       # Separate index for workflow executions
       if "workflow_execution" in [tags] {
         elasticsearch {
-          hosts => ["http://elasticsearch:9200"]
+          hosts => ["http://elasticsearch.logging.svc.cluster.local:9200"]
           index => "askyia-workflows-%{+YYYY.MM.dd}"
         }
       }
-      
+
       # Separate index for errors
       if "error" in [tags] {
         elasticsearch {
-          hosts => ["http://elasticsearch:9200"]
+          hosts => ["http://elasticsearch.logging.svc.cluster.local:9200"]
           index => "askyia-errors-%{+YYYY.MM.dd}"
         }
       }
-      
-      # Debug output (comment out in production)
+
+      # Separate index for HTTP requests
+      if "http_request" in [tags] {
+        elasticsearch {
+          hosts => ["http://elasticsearch.logging.svc.cluster.local:9200"]
+          index => "askyia-http-%{+YYYY.MM.dd}"
+        }
+      }
+
+      # Debug output (uncomment for troubleshooting)
       # stdout { codec => rubydebug }
     }
-
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: logstash
-  namespace: workflow-builder
+  namespace: logging
   labels:
     app: logstash
     app.kubernetes.io/name: logstash
@@ -198,10 +265,10 @@ spec:
             - name: ENVIRONMENT
               value: "production"
             - name: LS_JAVA_OPTS
-              value: "-Xms256m -Xmx256m"
+              value: "-Xms512m -Xmx512m"
           resources:
             requests:
-              memory: "512Mi"
+              memory: "768Mi"
               cpu: "200m"
             limits:
               memory: "1Gi"
@@ -219,14 +286,16 @@ spec:
             httpGet:
               path: /
               port: 9600
-            initialDelaySeconds: 30
+            initialDelaySeconds: 60
             periodSeconds: 10
+            timeoutSeconds: 5
           livenessProbe:
             httpGet:
               path: /
               port: 9600
-            initialDelaySeconds: 60
+            initialDelaySeconds: 120
             periodSeconds: 30
+            timeoutSeconds: 5
       volumes:
         - name: config
           configMap:
@@ -234,15 +303,16 @@ spec:
         - name: pipeline
           configMap:
             name: logstash-pipeline
-
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: logstash
-  namespace: workflow-builder
+  namespace: logging
   labels:
     app: logstash
+    app.kubernetes.io/name: logstash
+    app.kubernetes.io/part-of: askyia
 spec:
   type: ClusterIP
   selector:

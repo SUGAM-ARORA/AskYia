@@ -3,19 +3,33 @@ kind: ConfigMap
 metadata:
   name: kibana-config
   namespace: logging
+  labels:
+    app: kibana
+    app.kubernetes.io/name: kibana
+    app.kubernetes.io/part-of: askyia
 data:
   kibana.yml: |
     server.name: kibana
     server.host: "0.0.0.0"
     server.port: 5601
-    elasticsearch.hosts: ["http://elasticsearch:9200"]
-    monitoring.ui.container.elasticsearch.enabled: true
-    xpack.security.enabled: false
-    xpack.encryptedSavedObjects.encryptionKey: "askyia-kibana-encryption-key-min-32-characters"
     
-    # Default index pattern
+    # Elasticsearch connection
+    elasticsearch.hosts: ["http://elasticsearch.logging.svc.cluster.local:9200"]
+    
+    # Monitoring
+    monitoring.ui.container.elasticsearch.enabled: true
+    
+    # Security (disabled for simplicity)
+    xpack.security.enabled: false
+    xpack.encryptedSavedObjects.encryptionKey: "askyia-kibana-encryption-key-min-32-characters-long"
+    
+    # Default settings
     kibana.defaultAppId: "discover"
-
+    
+    # Logging
+    logging.dest: stdout
+    logging.quiet: false
+    logging.verbose: false
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -24,6 +38,8 @@ metadata:
   namespace: logging
   labels:
     app: kibana
+    app.kubernetes.io/name: kibana
+    app.kubernetes.io/part-of: askyia
 spec:
   replicas: 1
   selector:
@@ -36,13 +52,17 @@ spec:
     spec:
       containers:
         - name: kibana
-          image: docker.elastic.co/kibana/kibana:8.11.0
+          image: docker.elastic.co/kibana/kibana:8.11.1
           ports:
             - containerPort: 5601
               name: http
           env:
             - name: ELASTICSEARCH_HOSTS
-              value: "http://elasticsearch:9200"
+              value: "http://elasticsearch.logging.svc.cluster.local:9200"
+            - name: SERVER_NAME
+              value: "kibana"
+            - name: XPACK_SECURITY_ENABLED
+              value: "false"
           resources:
             requests:
               memory: "512Mi"
@@ -60,17 +80,18 @@ spec:
               port: 5601
             initialDelaySeconds: 30
             periodSeconds: 10
+            timeoutSeconds: 5
           livenessProbe:
             httpGet:
               path: /api/status
               port: 5601
             initialDelaySeconds: 60
             periodSeconds: 30
+            timeoutSeconds: 5
       volumes:
         - name: config
           configMap:
             name: kibana-config
-
 ---
 apiVersion: v1
 kind: Service
@@ -79,28 +100,51 @@ metadata:
   namespace: logging
   labels:
     app: kibana
+    app.kubernetes.io/name: kibana
+    app.kubernetes.io/part-of: askyia
 spec:
   type: ClusterIP
+  selector:
+    app: kibana
   ports:
     - port: 5601
       targetPort: 5601
       name: http
+---
+# NodePort for local access
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana-nodeport
+  namespace: logging
+  labels:
+    app: kibana
+spec:
+  type: NodePort
   selector:
     app: kibana
-
+  ports:
+    - port: 5601
+      targetPort: 5601
+      nodePort: 30561
+      name: http
 ---
-# Ingress for Kibana (Optional - modify for your ingress controller)
+# Ingress for external access
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: kibana-ingress
   namespace: logging
+  labels:
+    app: kibana
+    app.kubernetes.io/name: kibana
+    app.kubernetes.io/part-of: askyia
   annotations:
     kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
+  ingressClassName: nginx
   rules:
-    - host: kibana.askyia.local  # Change to your domain
+    - host: kibana.askyia.local
       http:
         paths:
           - path: /

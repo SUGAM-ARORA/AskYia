@@ -5,13 +5,12 @@ namespace: monitoring
 
 resources:
   - namespace.yaml
-  - prometheus/config.yaml
-  - prometheus/rules.yaml
-  - prometheus/deployment.yaml
-  - grafana/config.yaml
-  - grafana/dashboards/askyia-overview.json
-  - grafana/deployment.yaml
+  - prometheus-config.yaml
+  - prometheus-deployment.yaml
+  - grafana-config.yaml
+  - grafana-deployment.yaml
 
 commonLabels:
   app.kubernetes.io/part-of: askyia
   app.kubernetes.io/managed-by: kustomize
+  environment: production

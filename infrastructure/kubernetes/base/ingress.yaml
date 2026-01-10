@@ -1,12 +1,44 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: askyia
+  name: askyia-ingress
   namespace: askyia
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
 spec:
+  ingressClassName: nginx
   rules:
-    - http:
+    - host: askyia.local
+      http:
         paths:
+          # API routes
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: backend
+                port:
+                  number: 8000
+          # Health check
+          - path: /health
+            pathType: Prefix
+            backend:
+              service:
+                name: backend
+                port:
+                  number: 8000
+          # Metrics (for Prometheus)
+          - path: /metrics
+            pathType: Prefix
+            backend:
+              service:
+                name: backend
+                port:
+                  number: 8000
+          # Frontend (catch-all)
           - path: /
             pathType: Prefix
             backend:
@@ -14,3 +46,34 @@ spec:
                 name: frontend
                 port:
                   number: 80
+---
+# NodePort service for local access without ingress
+apiVersion: v1
+kind: Service
+metadata:
+  name: askyia-nodeport
+  namespace: askyia
+spec:
+  type: NodePort
+  selector:
+    app: frontend
+  ports:
+    - port: 80
+      targetPort: 5173
+      nodePort: 30080
+      name: frontend
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-nodeport
+  namespace: askyia
+spec:
+  type: NodePort
+  selector:
+    app: backend
+  ports:
+    - port: 8000
+      targetPort: 8000
+      nodePort: 30081
+      name: backend

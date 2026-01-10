@@ -5,11 +5,12 @@ namespace: logging
 
 resources:
   - namespace.yaml
-  - elasticsearch.yaml
-  - logstash.yaml
-  - kibana.yaml
-  - filebeat.yaml
+  - elasticsearch-deployment.yaml
+  - logstash-deployment.yaml
+  - kibana-deployment.yaml
+  - filebeat-deployment.yaml
 
 commonLabels:
   app.kubernetes.io/part-of: askyia
   app.kubernetes.io/managed-by: kustomize
+  environment: production

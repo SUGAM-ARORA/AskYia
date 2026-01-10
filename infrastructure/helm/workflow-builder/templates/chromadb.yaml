@@ -1,24 +1,32 @@
+{{- if .Values.chromadb.enabled }}
+{{- if .Values.chromadb.persistence.enabled }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: chromadb-data
-  namespace: askyia
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    {{- include "askyia.labels" . | nindent 4 }}
+    app: chromadb
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 5Gi
+      storage: {{ .Values.chromadb.persistence.size }}
+  {{- if .Values.chromadb.persistence.storageClass }}
+  storageClassName: {{ .Values.chromadb.persistence.storageClass }}
+  {{- end }}
 ---
+{{- end }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: chromadb
-  namespace: askyia
+  namespace: {{ .Values.global.namespace }}
   labels:
+    {{- include "askyia.labels" . | nindent 4 }}
     app: chromadb
-    app.kubernetes.io/name: chromadb
-    app.kubernetes.io/part-of: askyia
 spec:
   replicas: 1
   selector:
@@ -33,7 +41,7 @@ spec:
     spec:
       containers:
         - name: chromadb
-          image: chromadb/chroma:0.4.22
+          image: "{{ .Values.chromadb.image.repository }}:{{ .Values.chromadb.image.tag }}"
           ports:
             - containerPort: 8000
               name: http
@@ -45,15 +53,12 @@ spec:
             - name: PERSIST_DIRECTORY
               value: "/chroma/chroma"
           resources:
-            requests:
-              memory: "256Mi"
-              cpu: "100m"
-            limits:
-              memory: "1Gi"
-              cpu: "500m"
+            {{- toYaml .Values.chromadb.resources | nindent 12 }}
+          {{- if .Values.chromadb.persistence.enabled }}
           volumeMounts:
             - name: chromadb-data
               mountPath: /chroma/chroma
+          {{- end }}
           readinessProbe:
             httpGet:
               path: /api/v1/heartbeat
@@ -66,23 +71,27 @@ spec:
               port: 8000
             initialDelaySeconds: 30
             periodSeconds: 30
+      {{- if .Values.chromadb.persistence.enabled }}
       volumes:
         - name: chromadb-data
           persistentVolumeClaim:
             claimName: chromadb-data
+      {{- end }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: chromadb
-  namespace: askyia
+  namespace: {{ .Values.global.namespace }}
   labels:
+    {{- include "askyia.labels" . | nindent 4 }}
     app: chromadb
 spec:
   type: ClusterIP
   selector:
     app: chromadb
   ports:
-    - port: 8000
+    - port: {{ .Values.chromadb.service.port }}
       targetPort: 8000
       name: http
+{{- end }}

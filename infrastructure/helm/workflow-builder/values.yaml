@@ -1,45 +1,144 @@
-replicaCount: 1
+# Global settings
+global:
+  namespace: askyia
+  imagePullPolicy: IfNotPresent
 
+# Replica counts
+replicaCount:
+  frontend: 1
+  backend: 1
+
+# Frontend configuration
 frontend:
   image:
-    repository: frontend
+    repository: askyia-frontend
     tag: latest
     pullPolicy: IfNotPresent
   service:
     type: ClusterIP
     port: 80
+    targetPort: 5173
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "50m"
+    limits:
+      memory: "256Mi"
+      cpu: "200m"
+  env:
+    VITE_API_BASE_URL: "http://backend:8000"
+    VITE_API_V1_STR: "/api/v1"
 
+# Backend configuration
 backend:
   image:
-    repository: backend
+    repository: askyia-backend
     tag: latest
     pullPolicy: IfNotPresent
   service:
     type: ClusterIP
     port: 8000
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
   env:
-    DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/workflow
+    LOG_LEVEL: "info"
+    LOG_FORMAT: "json"
+    API_V1_STR: "/api/v1"
+    PROJECT_NAME: "Askyia"
 
+# PostgreSQL configuration
 postgres:
+  enabled: true
   image:
     repository: postgres
-    tag: 15
-  env:
-    POSTGRES_USER: postgres
-    POSTGRES_PASSWORD: postgres
-    POSTGRES_DB: workflow
+    tag: "15-alpine"
+  service:
+    port: 5432
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  persistence:
+    enabled: true
+    size: 5Gi
+    storageClass: ""
+  auth:
+    username: postgres
+    password: postgres
+    database: workflow
 
+# ChromaDB configuration
 chromadb:
+  enabled: true
   image:
     repository: chromadb/chroma
-    tag: 0.4.22
+    tag: "0.4.22"
+  service:
+    port: 8000
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "1Gi"
+      cpu: "500m"
+  persistence:
+    enabled: true
+    size: 5Gi
+    storageClass: ""
 
+# Secrets - CHANGE THESE IN PRODUCTION
+secrets:
+  jwtSecret: "change-me-in-production-use-strong-secret-key"
+  jwtAlgorithm: "HS256"
+  accessTokenExpireMinutes: "1440"
+  openaiApiKey: ""
+  geminiApiKey: ""
+  serpapiApiKey: ""
+  braveApiKey: ""
+
+# Ingress configuration
 ingress:
   enabled: true
   className: nginx
-  annotations: {}
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
   hosts:
-    - host: workflow-builder.local
+    - host: askyia.local
       paths:
+        - path: /api
+          pathType: Prefix
+          service: backend
+          port: 8000
         - path: /
           pathType: Prefix
+          service: frontend
+          port: 80
+  tls: []
+
+# NodePort for local development
+nodePort:
+  enabled: true
+  frontend: 30080
+  backend: 30081
+
+# Monitoring
+monitoring:
+  enabled: false
+  prometheus:
+    scrape: true
+    port: 8000
+    path: "/metrics"
+
+# Logging
+logging:
+  enabled: false
