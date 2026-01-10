@@ -1,19 +1,175 @@
-.env
-node_modules/
+# =============================================================================
+# Python
+# =============================================================================
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv/
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Pytest
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+*.py,cover
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Ruff
+.ruff_cache/
+
+# =============================================================================
+# Node.js
+# =============================================================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+
+# Build outputs
 dist/
 build/
-.vscode/
+.next/
+out/
+
+# =============================================================================
+# IDE & Editors
+# =============================================================================
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+*.sublime-project
+
+# VS Code (keep settings, ignore local)
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# =============================================================================
+# Operating System
+# =============================================================================
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# =============================================================================
+# Environment & Secrets
+# =============================================================================
+.env
+.env.local
+.env.*.local
+.env.development
+.env.test
+.env.production
+!.env.example
+
+# Secrets
+*.pem
+*.key
+secrets/
+.secrets
+
+# =============================================================================
+# Docker
+# =============================================================================
 *.log
-mine
-docs/deployment-guide.md
-docs/run-guide.md
-frontend/QUICKSTART.md
-frontend/SAMPLE_WORKFLOWS.md
-start-local.bat
-start-local.sh
-start.bat
-start.sh
-START.md
+docker-compose.override.yml
+
+# =============================================================================
+# Database
+# =============================================================================
+*.db
+*.sqlite
+*.sqlite3
+postgres_data/
+chromadb_data/
+
+# =============================================================================
+# Logs & Temp
+# =============================================================================
+logs/
+*.log
+tmp/
+temp/
+.temp/
+.cache/
+
+# =============================================================================
+# Testing
+# =============================================================================
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+
+# =============================================================================
+# Build & Package
+# =============================================================================
+*.tar.gz
+*.zip
+
+# =============================================================================
+# Project Specific
+# =============================================================================
+uploads/
+documents/
+*.pdf
+!docs/**/*.pdf
+
+# ChromaDB local data
+chroma_data/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Mine/Personal
+mine/
