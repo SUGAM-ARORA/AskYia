@@ -17,7 +17,7 @@ email-validator==2.0.0.post2
 # Authentication & Security
 passlib==1.7.4
 python-jose==3.3.0
-PyJWT==2.8.0
+PyJWT==2.10.1
 
 # Logging & Monitoring
 structlog==24.1.0
