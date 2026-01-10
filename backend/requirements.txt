@@ -45,7 +45,7 @@ pymupdf==1.23.8
 serpapi==0.1.5
 
 # Utilities
-numpy<2.0.0
+numpy<3.0.0
 aiohttp
 
 # Optional: Redis for distributed features (uncomment if needed)
